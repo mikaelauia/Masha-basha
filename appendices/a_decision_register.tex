@@ -1,7 +1,7 @@
 \chapter{Configurations and additional runs}\label{app:decisions}\label{app:fullresults}
 \enlargethispage{1\baselineskip}
 
-In the final comparison, Subword CNN reuses the checkpoint selected in the validation screen with seed 42. The fits with seeds 43 and 44 follow the same validation rule. \textbf{Scheduled Word CNN} was trained in the validation screen with seed 42. Its selected checkpoints were fixed before evaluation across the official test conditions.
+In the final three-seed comparison, Subword CNN reuses the seed-42 checkpoint selected during the validation screen and fits seeds 43 and 44 under the exact same validation rule. \textbf{Scheduled Word CNN} was likewise trained during the seed-42 validation screen, with its selected checkpoints frozen prior to scoring across the official test conditions.
 
 \section{Hyperparameter configurations}
 Table~\ref{tab:app-hyperparams} summarizes the complete hyperparameter and architectural specifications of the models analyzed in the main text. All models share the exact same alphabetic tokenizer (\artifact{[a-z]+}), limit of 128 words, training split of 20,000 articles, and validation split of 4,000 articles.
@@ -60,5 +60,5 @@ Subword CNN & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
 \end{table}
 \FloatBarrier
 
-\section{Saved evidence}
-The project archive preserves aggregate metrics at full precision and measurements for each seed and condition. It also includes validation logs, results from the separate confirmation sample, paired bootstrap intervals, and results from the additional evaluations.
+\paragraph{Saved evidence archive.}
+The accompanying project archive preserves aggregate and seed-level metrics at full floating-point precision, validation histories, predictions on the separate confirmation sample, paired bootstrap intervals, and outputs from all follow-up evaluations.
