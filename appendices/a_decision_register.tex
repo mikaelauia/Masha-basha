@@ -1,32 +1,31 @@
 \chapter{Configurations and additional runs}\label{app:decisions}\label{app:fullresults}
-\enlargethispage{1\baselineskip}
 
-In the final three-seed comparison, Subword CNN reuses the seed-42 checkpoint selected during the validation screen and fits seeds 43 and 44 under the exact same validation rule. \textbf{Scheduled Word CNN} was likewise trained during the seed-42 validation screen, with its selected checkpoints frozen prior to scoring across the official test conditions.
+In the final three-seed comparison, Subword CNN reuses its seed-42 validation-screen checkpoint alongside fits at seeds 43 and 44 under the same selection rule; \textbf{Scheduled Word CNN} uses its frozen seed-42 validation-screen checkpoints.
 
 \section{Hyperparameter configurations}
-Table~\ref{tab:app-hyperparams} summarizes the complete hyperparameter and architectural specifications of the models analyzed in the main text. All models share the exact same alphabetic tokenizer (\artifact{[a-z]+}), limit of 128 words, training split of 20,000 articles, and validation split of 4,000 articles.
+Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and optimization specifications across the shared 20,000-article training and 4,000-article validation splits.
 
 \begin{table}[!htbp]
 \centering\footnotesize
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{35mm}>{\raggedright\arraybackslash}X@{}}
 \toprule
 Pipeline component & Configuration details \\
 \midrule
-Shared preprocessing & Concatenate title and description, lowercase, extract \artifact{[a-z]+} tokens, retain the first 128 words. Filter normalized text for exact overlaps and label conflicts. \\
-Training arms & \textbf{Clean:} 20,000 uncorrupted training articles (5,000 per topic). \textbf{Augmented:} 50\% of each topic (10,000 articles total) replaced in place with versions generated at the interior letter swap target $p = 10\%$ (static per fitting seed). \\
-Word TF-IDF LR & Word unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, $L_2$ row normalization. Multinomial logistic regression with $L_2$ penalty, L-BFGS ($\le 1{,}000$ iterations), tuned over $C \in \{0.5, 2.0, 8.0\}$ on validation $J(f)$ ($C = 2.0$ selected for clean, $C = 8.0$ for augmented). \\
-Word CNN & Word vocabulary with 30,000 rows (29,998 words + pad ID 0 + \texttt{<unk>} ID 1), embeddings of dimension 96 initialized from $\mathcal{N}(0,1)$. Parallel 1D convolutions use 64 filters each at kernel widths $k \in \{3, 4, 5\}$ and $\operatorname{ReLU}$. Global max pooling with padding masked (192 features) is followed by dropout $0.5$ and a linear head ($192 \to 4$). Cross-entropy loss, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch size 128, gradient norm clipping at 5.0. Up to 8 epochs with early stopping patience 2 on $J(f)$. \\
-Scheduled Word CNN & Identical architecture and parameter count (2,954,692 scalars) to Word CNN, trained for up to 16 epochs with early stopping patience 4 and a \texttt{ReduceLROnPlateau} scheduler that halves the learning rate after 2 epochs without improvement in $J(f)$. \\
-Subword CNN & Extends Scheduled Word CNN (16 max epochs, patience 4, plateau LR halving) with an 8,193 $\times$ 96 character fragment embedding table (786,528 added scalars, 3,741,220 total). Adds boundary markers (\texttt{<}, \texttt{>}) before extracting character n-grams of lengths 3 to 5, keeps up to 16 evenly spaced fragments per word, hashes each into $1 \dots 8{,}192$, and adds the fragment mean to the word embedding prior to convolution. \\
+Shared preprocessing & Concatenate title and description, lowercase, extract \artifact{[a-z]+} tokens, cap at 128 words; filter exact normalized overlaps and label conflicts. \\
+Training arms & \textbf{Clean:} 20,000 uncorrupted articles (5,000 per topic). \textbf{Augmented:} 50\% per topic (10,000 total) replaced in place at $p = 10\%$ swaps (static per seed). \\
+Word TF-IDF LR & Unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, $L_2$ row norm; multinomial $L_2$ logistic regression via L-BFGS ($\le 1{,}000$ iter.), $C \in \{0.5, 2.0, 8.0\}$ tuned on $J(f)$ ($C = 2.0$ clean, $C = 8.0$ augmented). \\
+Word CNN & 30,000-row vocabulary (29,998 words, pad ID 0, \texttt{<unk>} ID 1), 96-dim $\mathcal{N}(0,1)$ embeddings; parallel 1D convolutions (64 filters each, $k \in \{3, 4, 5\}$, $\operatorname{ReLU}$), masked global max pooling (192 features), dropout $0.5$, linear head ($192 \to 4$); cross-entropy, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch 128, gradient clipping at 5.0, $\le 8$ epochs (patience 2 on $J(f)$). \\
+Scheduled Word CNN & Identical Word CNN architecture (2,954,692 scalars); $\le 16$ epochs, patience 4, \texttt{ReduceLROnPlateau} halving LR after 2 stalled epochs on $J(f)$. \\
+Subword CNN & Scheduled Word CNN schedule plus $8{,}193 \times 96$ fragment table ($+786{,}528$ scalars; 3,741,220 total); \texttt{<} and \texttt{>} boundary markers, 3--5 character n-grams, $\le 16$ evenly spaced fragments hashed into $1 \dots 8{,}192$, mean added to word embedding before convolution. \\
 \bottomrule
 \end{tabularx}
-\caption[Detailed model and training configurations]{Summary of preprocessing, feature extraction, architecture, and optimization settings for the compared models.}
+\caption[Detailed model and training configurations]{Summary of preprocessing, feature extraction, architecture, and optimization settings.}
 \label{tab:app-hyperparams}
 \end{table}
 \FloatBarrier
 
 \section{Variation across fitting seeds and additional evaluation runs}
-Table~\ref{tab:core-fit-sd} reports the sample standard deviations across the three fitting seeds (42, 43, and 44) corresponding to the mean accuracy and Macro-F1 scores across three seeds in Table~\ref{tab:corefull}. Table~\ref{tab:app-seed-draws} provides the individual test accuracies by seed at the 20\% swap target across all three independent test corruption draws (seeds 41001, 41002, and 41003), alongside the complete sweep across four swap targets ($0\%, 5\%, 10\%$, and $20\%$ swaps) for the \textbf{Scheduled Word CNN} ablation with seed 42.
+Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003, alongside the full $0\%, 5\%, 10\%$, and $20\%$ sweep for seed-42 \textbf{Scheduled Word CNN}.
 
 \input{tables/core_fit_variation}
 
@@ -55,10 +54,10 @@ Subword CNN & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
 \multicolumn{8}{@{}l}{Aug.\ arm, 0\%: 87.17 / 87.18, \quad 5\%: 86.59 / 86.60, \quad 10\%: 86.14 / 86.15, \quad 20\%: 85.50 / 85.51} \\
 \bottomrule
 \end{tabular}
-\caption[Accuracy by seed across 20\% swap draws and Scheduled Word CNN sweep]{Individual test accuracies by fitting seed (\%) at the 20\% swap target across the three random swap draws (seeds 41001, 41002, and 41003), together with the full severity sweep for Scheduled Word CNN with seed 42.}
+\caption[Accuracy by seed across 20\% swap draws and Scheduled Word CNN sweep]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003, plus the full swap sweep for seed-42 Scheduled Word CNN.}
 \label{tab:app-seed-draws}
 \end{table}
 \FloatBarrier
 
 \paragraph{Saved evidence archive.}
-The accompanying project archive preserves aggregate and seed-level metrics at full floating-point precision, validation histories, predictions on the separate confirmation sample, paired bootstrap intervals, and outputs from all follow-up evaluations.
+The project archive stores full-precision aggregate and seed-level metrics, validation histories, confirmation-set predictions, paired bootstrap intervals, and all follow-up outputs.

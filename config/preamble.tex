@@ -36,9 +36,9 @@ pdfauthor={Eivind Bakken and Mikael Andersstuen},pdftitle={Robust News Classific
 
 
 \raggedbottom
-\interlinepenalty=10000
 \renewcommand{\labelitemi}{\ensuremath{\bullet}}
 \IfFileExists{ec-lmr6.tfm}{}{%
+  \makeatletter\input{t1lmr.fd}\makeatother
   \DeclareFontShape{T1}{lmr}{m}{n}{<-8.5>ec-lmr8 <8.5-9.5>ec-lmr9
     <9.5-11>ec-lmr10 <11-15>ec-lmr12 <15->ec-lmr17}{}%
 }

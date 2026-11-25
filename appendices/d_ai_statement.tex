@@ -1,11 +1,11 @@
 \chapter{AI assistance and author responsibility}\label{app:ai}
-In accordance with the IKT466 course guidelines on artificial intelligence tools, we disclose the AI systems used during this project and how their outputs were verified.
+Following IKT466 guidelines on artificial intelligence tools, we document all AI systems used and our verification procedures.
 
 \paragraph{Tools and versions used.}
-OpenAI Codex (including GPT-6.1 Terra and GPT-6.1 Sol) assisted with project planning, code implementation, debugging, experiment execution, data analysis, plotting, and initial report drafting. Anthropic Claude provided editorial critique during earlier review passes. Google Antigravity (Gemini 4 Argon and Gemini 4 Carbon) was used to refine the section hierarchy, headings, and academic prose for clarity, verify alignment against the IKT466 project specification and source code, and perform final editorial checks.
+OpenAI Codex (GPT-6.1 Terra and GPT-6.1 Sol) assisted with planning, implementation, debugging, experiment execution, analysis, plotting, and initial drafting. Anthropic Claude provided editorial critique during intermediate reviews, and Google Antigravity (Gemini 4 Argon and Gemini 4 Carbon) assisted with structural refinement, prose editing, specification and code alignment checks, and final proofreading.
 
 \paragraph{Verification of generated code and text.}
-Every architectural description, equation, and hyperparameter setting in the report was checked directly against the Python implementation. All reported accuracy scores, Macro-F1 values, per-topic $F_1$ scores, bootstrap confidence intervals, parameter counts, and training timings were verified against the saved experimental outputs. For example, the Subword CNN confusion matrix at seed 42 (Table~\ref{tab:confusion-review}), the net changes in correct predictions by topic (Table~\ref{tab:topic-correct-change}), and the paired counts of prediction flips (Figure~\ref{fig:paired-changes}) were independently recomputed from the saved article-level predictions.
+All architectural descriptions, equations, and hyperparameters were verified directly against the Python source code, and all metrics, per-topic $F_1$ scores, bootstrap intervals, parameter counts, and timings were checked against saved run logs. For instance, the seed-42 Subword CNN confusion matrix (Table~\ref{tab:confusion-review}), topic-level net correctness changes (Table~\ref{tab:topic-correct-change}), and paired flip counts (Figure~\ref{fig:paired-changes}) were independently recomputed from stored article-level predictions.
 
 \paragraph{Author responsibility.}
-The authors take full responsibility for all submitted code, experimental results, bibliographic references, and scientific claims, and are prepared to explain every part of the work.
+The authors assume full responsibility for all submitted code, experimental results, references, and claims, and are prepared to explain every component of the work.

@@ -2,10 +2,10 @@
 \toprule
 Model & Clean representation (\texttt{consumer}) & Corrupted representation (\texttt{cosnumer}) \\
 \midrule
-Word TF-IDF LR & The word \texttt{consumer} appears twice in the article and activates its learned unigram feature. Neither adjacent bigram is in the fitted vocabulary. & The misspelled token \texttt{cosnumer} is out of vocabulary, but the second, unedited occurrence of \texttt{consumer} keeps the unigram feature active (with its normalized weight reduced by roughly 40\%). \\
+Word TF-IDF LR & Two occurrences of \texttt{consumer} activate its unigram feature; neither adjacent bigram is in the vocabulary. & \texttt{cosnumer} is out of vocabulary, but the second, unedited \texttt{consumer} keeps the unigram active (at roughly 40\% lower normalized weight). \\
 \addlinespace
-Word CNN & The edited word position maps to the 96-dimensional learned embedding for \texttt{consumer}. & The edited position falls back entirely to the shared unknown token (\texttt{<unk>}) embedding vector. \\
+Word CNN & Maps the edited position to the learned 96-dimensional embedding for \texttt{consumer}. & Maps the edited position to the shared unknown (\texttt{<unk>}) embedding vector. \\
 \addlinespace
-Subword CNN & The learned word embedding for \texttt{consumer} is summed with the average of 16 selected character fragment vectors. & The shared embedding for unknown words is summed with a new average of 16 fragment vectors. Six of those fragments (including boundary fragments \texttt{<co} and \texttt{mer>}) still map to the exact same learned buckets as before the swap. \\
+Subword CNN & Sums the \texttt{consumer} word embedding with the mean of 16 selected character-fragment vectors. & Sums \texttt{<unk>} with the new 16-fragment mean; six fragments (including \texttt{<co} and \texttt{mer>}) retain their pre-swap hash buckets. \\
 \bottomrule
 \end{tabularx}

@@ -1,17 +1,5 @@
 {
-  "revision": "List of Listings and table layout revision",
-  "pages_total": 38,
-  "front_matter_pages": 4,
-  "main_body_pages": 29,
-  "introduction_pages": 2,
-  "background_pages": 3,
-  "methodology_pages": 8,
-  "experimental_design_pages": 4,
-  "results_pages": 7,
-  "discussion_pages": 4,
-  "conclusion_pages": 1,
-  "bibliography_pages": 1,
-  "appendix_pages": 4,
+  "revision": "Conciseness and page-break revision",
   "chapter_revised": 7,
   "swap_draw_aug_gains_verified": 9,
   "net_correct_by_topic_verified": 12,
@@ -43,9 +31,10 @@
   "overfull_boxes": 0,
   "undefined_references": 0,
   "missing_characters": 0,
-  "visual_review": "Reviewed the list pages, table positions, and page breaks. The listing link resolves to Listing 3.1.",
-  "report_pdf_sha256": "1d057abb52d4bf007712acc2028681ec1658431b63172ebca76743136f14a68b",
+  "visual_review": "Rendered with pdfLaTeX+BibTeX; contents and lists each fit one page; no solitary-float or few-line spillover pages.",
+  "report_pdf_sha256": "f748f1bd35a5ff470f3830d0f8d4db0954958cef997251a3f82fabcad3a9d147",
   "standalone_zip_compile_verified": true,
   "standalone_zip_pdf_text_matches_exported_pdf": true,
-  "held_out_augmentation_contrasts_verified": 2
+  "held_out_augmentation_contrasts_verified": 2,
+  "pdf_pages_total": 34
 }
