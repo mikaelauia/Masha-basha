@@ -1,9 +1,10 @@
 \chapter{Introduction}\label{ch:introduction}
 Automated news categorization systems must route incoming articles quickly and reliably despite minor typographical errors from hasty editing, optical character recognition, or keyboard entry. Whereas human readers readily infer a misspelled word from its outer letters and surrounding context, a classifier can lose a decisive cue whenever a character transposition alters an expected token. How strongly such noise affects performance depends on how a model represents words, aggregates evidence across the document, and encounters corruptions during training.
 
-\section{Task, dataset, and research questions}
+\section{Task and dataset}
 We study four-topic news classification on the AG News benchmark \citep{zhang2015,agmirror}, where each model reads the combined title and description of a short news item and assigns it to one of four balanced classes: \emph{World}, \emph{Sports}, \emph{Business}, or \emph{Sci/Tech}. To simulate typographical noise under controlled conditions, we transpose a randomly chosen pair of unequal adjacent interior letters within eligible words (for example, turning \texttt{consumer} into \texttt{cosnumer}), preserving word boundaries, word length, outer characters, and topic labels. Applying the same deterministic corruption stream to each evaluation split ensures that all models are compared on identical texts at each noise level.
 
+\section{Research questions}
 Before running our main experiments, we formulated two research questions and a focused investigation for each:
 
 \paragraph{Investigation 1 (Robustness across representations).}
@@ -14,9 +15,10 @@ Before running our main experiments, we formulated two research questions and a 
 
 Both investigations share a budget of 20,000 labeled training articles (5,000 per topic) from the filtered AG News pool and 4,000 validation articles for hyperparameter tuning and early stopping. Fixing this budget compares accuracy, robustness, and training cost on equal footing while keeping multi-seed neural runs tractable on CPU hardware.
 
-\section{Scope, robustness checks, and main findings}
+\section{Models compared}
 Our baseline, \textbf{Word TF-IDF LR}, fits multinomial logistic regression to $L_2$-normalized term frequency--inverse document frequency (TF-IDF) features over word unigrams and bigrams. Because topic-specific vocabulary and named entities strongly characterize news feeds, regularized sparse linear scoring provides a fast, competitive, and interpretable reference. We compare it against two convolutional neural networks (CNNs) trained from scratch: \textbf{Word CNN}, which applies parallel filters over windows of three, four, and five words on learned word embeddings to capture local phrases, and \textbf{Subword CNN}, which adds the mean of hashed character-fragment embeddings (three to five characters) to each word vector so out-of-vocabulary misspellings retain partial subword overlap.
 
+\section{Error analysis and additional checks}
 Beyond aggregate accuracy and Macro-F1, we pair clean and corrupted predictions for every test article across all swap targets. Because an edit can occasionally suppress a misleading cue and fix a prior error, paired tracking separates newly induced errors from accidental corrections and traces which topics absorb the resulting mistakes.
 
 Three additional checks test the scope of our findings:
@@ -26,8 +28,8 @@ Three additional checks test the scope of our findings:
 \item \textbf{Separate confirmation check.} Because early exploratory checks inspected the official test split during development, we evaluate our frozen seed-42 pipelines on a separate, untouched sample of 4,000 AG News articles at 0\% and 10\% swap targets.
 \end{itemize}
 
-\paragraph{Main findings.}
+\section{Main findings}
 Word TF-IDF LR achieves both the highest clean accuracy (90.05\%) and the strongest resilience under spelling noise, losing just 0.91 percentage points at the 20\% swap target while training in a median of 13 seconds. Static swap augmentation gives Subword CNN a modest mean gain at 20\% swaps ($+0.31$ to $+0.46$ percentage points across swap draws), yet the schedule ablation shows that longer training accounts for much of Subword CNN's advantage over Word CNN.
 
-\paragraph{Report outline.}
+\section{Report outline}
 Chapter~\ref{ch:background} reviews text representations, classifiers, and evaluation metrics. Chapters~\ref{ch:method} and~\ref{ch:experiments} detail dataset curation, spelling corruption, model architectures, and experimental controls. Chapter~\ref{ch:results} presents empirical results and error analyses, and Chapters~\ref{ch:discussion} and~\ref{ch:conclusion} cover the discussion, limitations, and conclusions.
