@@ -1,0 +1,26 @@
+\begin{tabular}{llrrr}
+\toprule
+Candidate & Arm & Noise & Gain (pp) & Pointwise 95\% interval \\
+\midrule
+Word TF-IDF SVM & C & 0 & +0.632 & [+0.329, +0.947] \\
+Word TF-IDF SVM & C & 20 & +0.645 & [+0.355, +0.934] \\
+Word TF-IDF SVM & A & 0 & +0.395 & [+0.167, +0.627] \\
+Word TF-IDF SVM & A & 20 & +0.487 & [+0.281, +0.697] \\
+Lexical + BGE SVM & C & 0 & +0.158 & [-0.105, +0.421] \\
+Lexical + BGE SVM & C & 20 & +0.368 & [+0.079, +0.632] \\
+Lexical + BGE SVM & A & 0 & +0.154 & [-0.048, +0.351] \\
+Lexical + BGE SVM & A & 20 & +0.395 & [+0.189, +0.614] \\
+Frozen BGE + tuned head & C & 0 & +0.338 & [+0.088, +0.596] \\
+Frozen BGE + tuned head & C & 20 & +0.083 & [-0.158, +0.355] \\
+Frozen BGE + tuned head & A & 0 & +0.461 & [+0.180, +0.763] \\
+Frozen BGE + tuned head & A & 20 & +0.355 & [+0.079, +0.640] \\
+Subword CNN & C & 0 & +0.382 & [+0.066, +0.706] \\
+Subword CNN & C & 20 & +0.833 & [+0.491, +1.202] \\
+Subword CNN & A & 0 & +0.750 & [+0.408, +1.096] \\
+Subword CNN & A & 20 & +1.298 & [+0.947, +1.640] \\
+BE-sort TF-IDF LR & C & 0 & +0.039 & [-0.211, +0.303] \\
+BE-sort TF-IDF LR & C & 20 & +0.947 & [+0.526, +1.369] \\
+BE-sort TF-IDF LR & A & 0 & -0.013 & [-0.180, +0.154] \\
+BE-sort TF-IDF LR & A & 20 & +0.833 & [+0.496, +1.202] \\
+\bottomrule
+\end{tabular}

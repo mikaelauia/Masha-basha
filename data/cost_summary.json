@@ -1,0 +1,19 @@
+{
+  "fit_and_feature_phase_seconds": {
+    "selected_refit": 100.84847160003847,
+    "head_search": 104.25342309998814,
+    "final_feature_preparation": 135.7380065000616,
+    "final_fit": 2644.773271800077,
+    "feature_preparation": 144.914608400024,
+    "search": 960.669809800107
+  },
+  "shared_encoding_call_wall_seconds": 318.3082828998449,
+  "cnn_development_costs": {
+    "linear_grid_search_seconds": 0,
+    "frozen_linear_refit_seconds": 0,
+    "cnn_candidate_training_seconds": 2460.368106799957,
+    "all_encoding_call_wall_seconds": 0,
+    "wall_seconds": 2532.5914537000353
+  },
+  "note": "Search, feature preparation, selected refits, final fits, shared extraction and reused checkpoints have different scopes. Baseline training times include original search; candidate columns measure selected fit, so do not directly rank those columns as total pipeline cost."
+}

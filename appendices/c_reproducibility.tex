@@ -1,0 +1,8 @@
+\chapter{Reproducibility}\label{app:repro}
+All experiments were executed on a Windows 11 workstation (AMD64 architecture) using Python 3.12.14, scikit-learn 1.9.1, and PyTorch 2.14.1+cpu restricted to four logical CPU threads without GPU acceleration. We use seed 2026 for the stratified dataset split and seeds 42, 43, and 44 for model fitting and training augmentation. Validation spelling swaps use seed 31001. Test spelling swaps use seed 41001, plus 41002 and 41003 for the two additional draws. Locked package versions, configuration records, split definitions, predictions for each article, and saved checkpoints accompany the project archive.
+
+The verification utility checks SHA-256 checksums and recomputes summary metrics from the saved predictions. Its replay mode reloads the models and checks whether their predictions agree with the saved values. This check can run on a sample or on all 7,600 official test articles for fitting seeds 42, 43, and 44.
+
+The preprocessing audit uses saved measurements from the training and validation split. The partition diagram uses the recorded split definitions, and the swap exposure curves use the recorded corruption counts. The plotting utility can regenerate selected tables and plots from saved measurements without retraining. The report package includes the rendered figures and tables used here.
+
+The report layout adapts the University of Agder thesis template \citep{uiatemplate}. The standalone package compiles with pdfLaTeX and BibTeX.

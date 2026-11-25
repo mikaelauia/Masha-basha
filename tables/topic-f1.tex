@@ -1,0 +1,13 @@
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrrrrr}\toprule
+ & \multicolumn{2}{c}{Word TF-IDF LR} & \multicolumn{2}{c}{Word CNN} & \multicolumn{2}{c}{Subword CNN} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Topic & 0\% & 20\% & 0\% & 20\% & 0\% & 20\% \\\midrule
+World & 90.91 & 89.96 & 87.20 & 84.21 & 87.38 & 84.21 \\
+Sports & 95.31 & 94.46 & 92.79 & 90.75 & 93.33 & 91.88 \\
+Business & 86.37 & 85.52 & 83.07 & 79.58 & 83.07 & 78.97 \\
+Sci/Tech & 87.54 & 86.53 & 84.46 & 82.76 & 84.64 & 82.48 \\
+\bottomrule
+\end{tabular}
+\caption[F1 scores by topic on the official test set]{$F_1$ scores by topic (\%) on the official test set for the models trained on clean text with seed 42 at the 0\% and 20\% swap targets.}\label{tab:topic-f1}
+\end{table}

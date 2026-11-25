@@ -1,0 +1,135 @@
+{
+  "created_utc": "2026-11-02T11:55:08.472508+00:00",
+  "parent_run": "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283",
+  "reference_run": "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029",
+  "smoke": false,
+  "scope": "exploratory_bounded_optimization",
+  "screening_seed": 42,
+  "final_seeds": [
+    42,
+    43,
+    44
+  ],
+  "train_size": 20000,
+  "validation_size": 4000,
+  "confirmation_size": 4000,
+  "validation_sha256": "e8c8535d3c3a30a54283887536d08440800f94df7d982e71f9698475f83853e7",
+  "training_sha256": {
+    "42/clean": "cb05d7dbb6c09923fd079f0336fa5bc75c0dcb664d9282ee035fd01bb30b4d62",
+    "42/augmented": "763236f9f2f1fc492a32b88ceddaca664428d4c344311d4c6dd91c6777bb8c9a",
+    "43/clean": "cb05d7dbb6c09923fd079f0336fa5bc75c0dcb664d9282ee035fd01bb30b4d62",
+    "43/augmented": "10076872990b48ee420c1c8aee666e4a0db30aa0232ad409dee42e294c1426dd",
+    "44/clean": "cb05d7dbb6c09923fd079f0336fa5bc75c0dcb664d9282ee035fd01bb30b4d62",
+    "44/augmented": "cf2ef2935ae372d1b5f9a8d00b82a45c9ab545d4edd1b6930aa85daf525d49c4"
+  },
+  "source_hashes": {
+    "main.py": "68281564b22d60aa73238b5b4a0c52f593ff7f72eee4a918bba2bae09d389134",
+    "pretrained.py": "ecac4caa7dcaa0dc8bc7a949eb34aa84bedabe7fb81a94a202996eeeb476d4ac",
+    "cnn_methods.py": "bccea9a242d3d94d578292ce25a2afe2a58313e38c5518d86fcaae6a8474e942",
+    "linear_methods.py": "3270898a879a1acfe07f0244d9201e10f99c3ecdb42259041bb4ef915b633598",
+    "improvement_study.py": "10c4ae4dd0803071e68ef7e00ec0d92d83fa0789b57a9aedff066ea130435db5",
+    "optimized_linear.py": "176b6fa6eecc23648a6cf8ceaf922d3fd0a56c540129d2de30518c6353aa4378",
+    "optimization_pass.py": "747e88049278b06c33a38b19226783d52052bbea69c0e26bf638dd460c3ea5c9"
+  },
+  "reference_checkpoint_hashes": {
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_42\\clean\\lr.joblib": "c075cfc9b3fc94e962c210d57c9d4e24ad8671715a200c56d3fb67415363ac3e",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_42\\clean\\cnn.pt": "66490ca5b1199b290347b80305cb13d5cfa593d4cef68344c8e9ed9c330ca507",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_42\\clean\\encoder_head.pt": "93379cb884ec65be5c77141ffd775081f496e90315ef70a61ade3f871f399456",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_42\\clean\\word_char.joblib": "881839af54d05106ad7fad351bb71eafbc998767bdc00b5a49038983f8c7a66d",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_42\\clean\\bge_linear.joblib": "99b9469da85e2b20c428fd0efa4e411c74746b9b81a72003ece66d38ef86c09b",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_42\\clean\\hybrid.joblib": "b3b9917c48cc11b325a3c08cfef7ae1e06dbffe418a6fc381780812a6b487d11",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_42\\augmented\\lr.joblib": "a249e1530d339b2a18748cc79c51594bfb7c7f7725a5826e98a4eb04ad58fb48",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_42\\augmented\\cnn.pt": "feb07783a1ea02794bcc86555ad50e381e9c787e7078bba774156e87f87a7ae0",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_42\\augmented\\encoder_head.pt": "ea59425fae02d1e9746e15c3d03cd1a2f901e1673e7083f26bfaa691dc1a19ac",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_42\\augmented\\word_char.joblib": "6eca4f6c083cef65c4d495cd7bc6cad15fa64c336ebef39d116b3716b5174046",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_42\\augmented\\bge_linear.joblib": "01ceb30e93ff81fec1461415400596b64326df4fbae02bc36fac3682cecc86a2",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_42\\augmented\\hybrid.joblib": "2ec84e8a22ed4eba57f0a1cbbf13df230042941d708af83a1b8a2d6fa163506c",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_43\\clean\\lr.joblib": "809a81c99d3e65c7d981762e2c373d5317ec03fe1821b070f24327c4ab7847dd",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_43\\clean\\cnn.pt": "c087a97846124b52bb498c78b48551229de84b5a304704ddf1c0adc0a779f70a",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_43\\clean\\encoder_head.pt": "c4b1759c06f57f905a505ca4a4306a6f916e52bd5a74c9e6293d42ed1c58dd79",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_43\\clean\\word_char.joblib": "2cb376c374f6fa8ffe7080983cd0484be668f594d083d420a7e5242cfc299669",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_43\\clean\\bge_linear.joblib": "837340b84b79fa18cddc6b4a17206932c861bd0792f0006b436c7451b2cf09da",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_43\\clean\\hybrid.joblib": "6f622fdb1f05648235a331a6a4ba02f2b77559191f6855bffb424ae7ded94d85",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_43\\augmented\\lr.joblib": "28effb34c67f1535a5e6be1bdbe90343d34ac437815e5714957c1f954a92e9ea",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_43\\augmented\\cnn.pt": "016148f64b3f8e00b701793028b06f7e38b2e1eefdbfe1d153fd44e2f99751c8",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_43\\augmented\\encoder_head.pt": "6cf5608ef783f992530afe2afbb8f01cecbaca32935745ddbe624c16e4aa1d9b",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_43\\augmented\\word_char.joblib": "c8e9a2b76efca81712f54029066c90045a38415ca0ea29bfebb4280f89300fc9",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_43\\augmented\\bge_linear.joblib": "ddcbb5c0753eadf516ccd869703108804b0244945a928b909146b36169e62fe7",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_43\\augmented\\hybrid.joblib": "f0751a4911871eebff086080a5c81da24dd941011c877ae1d61dd38c9a94a812",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_44\\clean\\lr.joblib": "058212834fb8eb9b5656d37907825161c79c5353917919e8c2be27119bcfd2e8",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_44\\clean\\cnn.pt": "6f75159676bfec7d7468290579378ed7c20b450468a15c534544ef5c22a9f906",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_44\\clean\\encoder_head.pt": "b00788ce8510b84ecb612754a951298d93b06f01fff7c8270baa62502ce760b7",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_44\\clean\\word_char.joblib": "bf438e251748a0a80588ed9e39246dca76b1dee78503fcaa5febf8f59e395d84",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_44\\clean\\bge_linear.joblib": "a5a6072bd54a7f02ad9c5b8858a59a2c6405eddd0571f56b22106b38574abc24",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_44\\clean\\hybrid.joblib": "9a7ee377fab9882ab3ee4d7f4a1694d264a262a39910aa09058a87d9cdad32a0",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_44\\augmented\\lr.joblib": "81b1f31eb927265cc248ca43403c8b840cba57f5ef9b88ca3d53a2c7f5c3a436",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_44\\augmented\\cnn.pt": "477b2af0669af98d837085d27f66a0522c2592846633a38353738e38da237c88",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\full_20261029_121900_515283\\seed_44\\augmented\\encoder_head.pt": "4d8da3d1528a75eaa26eb489aa4c2c80a3f4b798a0f02978192b863c00c43676",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_44\\augmented\\word_char.joblib": "bc7f1bf6c9586e924dc89fcdd76aae78646cae5d6b4fd9e5aeb6fb026589d9f7",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_44\\augmented\\bge_linear.joblib": "ae3dc2e9401ef78303493d5750cbaafeabedc784c60804863029427746ff6a3b",
+    "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\results\\improved_linear_comparison_20261029\\seed_44\\augmented\\hybrid.joblib": "4d2fb271d413e6f49e25719ab2c04da270b4463062c7a32aa57325556478abde"
+  },
+  "reference_metrics_sha256": "8e55950dfeaee9cc293c1def0907839adeb00a1e64107cfd6db7d3a2edb0d3de",
+  "linear_grids": {
+    "word_svm_C": [
+      0.5,
+      2.0,
+      8.0
+    ],
+    "word_char_weights": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "bge_C": [
+      0.125,
+      0.5,
+      2.0
+    ],
+    "hybrid_initial_char_weights": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "hybrid_coordinate_C": [
+      1.0,
+      2.0,
+      4.0
+    ],
+    "hybrid_coordinate_embedding_weights": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "hybrid_svm_C": [
+      0.5,
+      2.0,
+      8.0
+    ],
+    "be_sort_C": [
+      0.5,
+      2.0,
+      8.0
+    ]
+  },
+  "head_grid": {
+    "learning_rate": [
+      0.0003,
+      0.001,
+      0.003
+    ],
+    "dropout": [
+      0.0,
+      0.2
+    ]
+  },
+  "cnn_recipe": {
+    "max_epochs": 16,
+    "patience": 4
+  },
+  "selection_rule": "Common hyperparameters maximize mean clean/10%-noise development macro-F1 across both arms; first-listed ties win. All family finalists are retained for reporting.",
+  "confirmation_rule": "Only after recipe freeze. Compare each finalist with its matched fixed reference; confirmation is reported once, never used for retuning. Positive confirmation gain is required for a replacement recommendation.",
+  "cnn_rule": "Choose the higher across-arm development score of scheduled/subword CNN, retaining both trial results. Carry that recipe to three-seed testing even if it fails confirmation, to report the negative result.",
+  "test_rule": "Open official test inputs only after all final fits. Never change recipes based on test scores.",
+  "confirmation_sha256": "348a523f5cd4eb19c400914727830b260f5e3290dd2a8bee8b5db79da4aee78b"
+}

@@ -1,0 +1,66 @@
+% Adapted from the supplied UiA MSc template; see TEMPLATE_PROVENANCE.md.
+\usepackage[USenglish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,array,tabularx}
+\usepackage{eso-pic,xcolor,caption,placeins}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[obeyspaces]{url}
+\usepackage{hyperref}
+\usepackage{listings,needspace}
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{4pt plus 1pt}
+\setlength{\oddsidemargin}{0mm}
+\setlength{\evensidemargin}{0mm}
+\setlength{\topmargin}{-20mm}
+\setlength{\textwidth}{165mm}
+\setlength{\textheight}{260mm}
+\setlength{\emergencystretch}{2em}
+\definecolor{darkgreen}{rgb}{0.15,0.35,0.30}
+\hypersetup{colorlinks=true,citecolor=darkgreen,urlcolor=darkgreen,linkcolor=black,
+pdfauthor={Eivind Bakken and Mikael Andersstuen},pdftitle={Robust News Classification under Controlled Spelling Errors},pdfsubject={IKT466 final project},pdfstartview=Fit}
+\captionsetup{font=small,labelfont=bf}
+\lstset{basicstyle=\small\ttfamily,breaklines=true,breakatwhitespace=true,columns=fullflexible,keepspaces=true,frame=single,showstringspaces=false}
+\newcommand{\artifact}[1]{{\small\nolinkurl{#1}}}
+\renewcommand{\bibfont}{\small}
+\setlength{\bibsep}{3pt}
+\newcommand{\fig}[3]{\begin{figure}[htbp]\centering\includegraphics[width=#2\linewidth]{figures/#1}\caption{#3}\end{figure}}
+\newcommand{\pp}{\,\mathrm{pp}}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{12pt}
+\makeatother
+
+
+\raggedbottom
+\interlinepenalty=10000
+\renewcommand{\labelitemi}{\ensuremath{\bullet}}
+\IfFileExists{ec-lmr6.tfm}{}{%
+  \DeclareFontShape{T1}{lmr}{m}{n}{<-8.5>ec-lmr8 <8.5-9.5>ec-lmr9
+    <9.5-11>ec-lmr10 <11-15>ec-lmr12 <15->ec-lmr17}{}%
+}
+\IfFileExists{ec-lmbx9.tfm}{}{%
+  \DeclareFontShape{T1}{lmr}{bx}{n}{<-11>ec-lmbx10 <11->ec-lmbx12}{}%
+  \makeatletter\input{t1lmtt.fd}\makeatother
+  \DeclareFontShape{T1}{lmtt}{m}{n}{<->ec-lmtt10}{}%
+}
+\IfFileExists{lmmi6.pfb}{}{%
+  \input{omllmm.fd}\input{omslmsy.fd}\input{ot1lmr.fd}%
+  \DeclareFontShape{OML}{lmm}{m}{it}{<-9.5>lmmi8 <9.5->lmmi10}{}%
+  \DeclareFontShape{OMS}{lmsy}{m}{n}{<-7.5>lmsy7 <7.5-9.5>lmsy8
+    <9.5->lmsy10}{}%
+  \DeclareFontShape{OT1}{lmr}{m}{n}{<-7.5>rm-lmr7 <7.5-9.5>rm-lmr8
+    <9.5->rm-lmr10}{}%
+}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+
+

@@ -1,0 +1,12 @@
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrrr}\toprule
+ & \multicolumn{2}{c}{Clean training} & \multicolumn{2}{c}{Augmented training} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Model (seed 42) & 0\% swaps & 20\% swaps & 0\% swaps & 20\% swaps \\\midrule
+Word CNN (8 epochs) & 86.89 & 84.39 & 86.74 & 84.75 \\
+Scheduled Word CNN (up to 16 epochs) & 87.22 & 84.64 & 87.17 & 85.50 \\
+Subword CNN (up to 16 epochs) & 87.13 & 84.49 & 87.18 & 85.57 \\
+\bottomrule
+\end{tabular}
+\caption[Schedule comparison with seed 42 on the official test set]{Official test accuracy (\%) for the saved neural checkpoints fitted with seed 42 at 0\% and 20\% swap targets under clean and augmented training. Scheduled Word CNN applies the schedule of up to 16 epochs and learning rate decay of Subword CNN to the architecture of Word CNN, which uses only words.}\label{tab:scheduled-review}
+\end{table}

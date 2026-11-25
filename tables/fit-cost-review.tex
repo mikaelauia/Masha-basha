@@ -1,0 +1,12 @@
+\begin{table}[!htbp]\centering\small
+\begin{tabular}{lrrr}\toprule
+Model & Stored scalars & Epochs or solver & Recorded fit time (s) \\\midrule
+Word TF-IDF LR & 200,004 & L-BFGS ($\le 1{,}000$ iter.) & 11--15 (median 13) \\
+Word CNN & 2,954,692 & 8 epochs (patience 2) & 202--241 (median 219) \\
+Scheduled Word CNN & 2,954,692 & 16 epochs (patience 4) & 501--514 (seed 42 only) \\
+Subword CNN & 3,741,220 & 14--16 epochs (patience 4) & 551--779 (median 642) \\
+\bottomrule
+\end{tabular}
+\caption[Parameters and training time across models]{Stored parameter counts and elapsed fitting times across six training runs per main model (three seeds $\times$ two training arms) and two development runs with seed 42 for Scheduled Word CNN. Word TF-IDF LR counts weights and intercepts, and its timing includes TF-IDF vectorization and validation tuning over $C \in \{0.5, 2, 8\}$. Neural counts include the fixed padding rows. Neural timings include input encoding, gradient updates, and validation scoring after each epoch.}
+\label{tab:fit-cost-review}
+\end{table}

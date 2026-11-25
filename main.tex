@@ -1,0 +1,46 @@
+\documentclass[a4paper,twoside,11pt]{report}
+\input{config/preamble}
+\input{config/metadata}
+\begin{document}
+\hypersetup{pageanchor=false}
+\input{frontmatter/titlepage}
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+\input{frontmatter/abstract}
+\begingroup
+\small
+\setlength{\parskip}{0pt}
+\addtocontents{toc}{\protect\enlargethispage{2\baselineskip}}
+\tableofcontents
+\endgroup
+\chapter*{Figures, Tables, and Listings}
+\addcontentsline{toc}{chapter}{Figures, Tables, and Listings}
+\begingroup
+\small
+\setlength{\parskip}{1pt}
+\makeatletter
+\section*{Figures}
+\@starttoc{lof}
+\section*{Tables}
+\@starttoc{lot}
+\section*{List of Listings}
+\@starttoc{lol}
+\makeatother
+\endgroup
+\clearpage\pagenumbering{arabic}
+\input{chapters/01_introduction}
+\input{chapters/02_background}
+\input{chapters/03_methodology}
+\input{chapters/04_experiments}
+\input{chapters/05_results}
+\input{chapters/06_discussion}
+\input{chapters/07_conclusion}
+\bibliographystyle{plainnat}
+{\raggedright\bibliography{references}}
+\appendix
+\input{appendices/a_decision_register}
+\input{appendices/b_full_results}
+\input{appendices/c_reproducibility}
+\input{appendices/d_ai_statement}
+\end{document}
+

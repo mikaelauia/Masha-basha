@@ -1,0 +1,64 @@
+\chapter{Configurations and additional runs}\label{app:decisions}\label{app:fullresults}
+\enlargethispage{1\baselineskip}
+
+In the final comparison, Subword CNN reuses the checkpoint selected in the validation screen with seed 42. The fits with seeds 43 and 44 follow the same validation rule. \textbf{Scheduled Word CNN} was trained in the validation screen with seed 42. Its selected checkpoints were fixed before evaluation across the official test conditions.
+
+\section{Hyperparameter configurations}
+Table~\ref{tab:app-hyperparams} summarizes the complete hyperparameter and architectural specifications of the models analyzed in the main text. All models share the exact same alphabetic tokenizer (\artifact{[a-z]+}), limit of 128 words, training split of 20,000 articles, and validation split of 4,000 articles.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Pipeline component & Configuration details \\
+\midrule
+Shared preprocessing & Concatenate title and description, lowercase, extract \artifact{[a-z]+} tokens, retain the first 128 words. Filter normalized text for exact overlaps and label conflicts. \\
+Training arms & \textbf{Clean:} 20,000 uncorrupted training articles (5,000 per topic). \textbf{Augmented:} 50\% of each topic (10,000 articles total) replaced in place with versions generated at the interior letter swap target $p = 10\%$ (static per fitting seed). \\
+Word TF-IDF LR & Word unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, $L_2$ row normalization. Multinomial logistic regression with $L_2$ penalty, L-BFGS ($\le 1{,}000$ iterations), tuned over $C \in \{0.5, 2.0, 8.0\}$ on validation $J(f)$ ($C = 2.0$ selected for clean, $C = 8.0$ for augmented). \\
+Word CNN & Word vocabulary with 30,000 rows (29,998 words + pad ID 0 + \texttt{<unk>} ID 1), embeddings of dimension 96 initialized from $\mathcal{N}(0,1)$. Parallel 1D convolutions use 64 filters each at kernel widths $k \in \{3, 4, 5\}$ and $\operatorname{ReLU}$. Global max pooling with padding masked (192 features) is followed by dropout $0.5$ and a linear head ($192 \to 4$). Cross-entropy loss, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch size 128, gradient norm clipping at 5.0. Up to 8 epochs with early stopping patience 2 on $J(f)$. \\
+Scheduled Word CNN & Identical architecture and parameter count (2,954,692 scalars) to Word CNN, trained for up to 16 epochs with early stopping patience 4 and a \texttt{ReduceLROnPlateau} scheduler that halves the learning rate after 2 epochs without improvement in $J(f)$. \\
+Subword CNN & Extends Scheduled Word CNN (16 max epochs, patience 4, plateau LR halving) with an 8,193 $\times$ 96 character fragment embedding table (786,528 added scalars, 3,741,220 total). Adds boundary markers (\texttt{<}, \texttt{>}) before extracting character n-grams of lengths 3 to 5, keeps up to 16 evenly spaced fragments per word, hashes each into $1 \dots 8{,}192$, and adds the fragment mean to the word embedding prior to convolution. \\
+\bottomrule
+\end{tabularx}
+\caption[Detailed model and training configurations]{Summary of preprocessing, feature extraction, architecture, and optimization settings for the compared models.}
+\label{tab:app-hyperparams}
+\end{table}
+\FloatBarrier
+
+\section{Variation across fitting seeds and additional evaluation runs}
+Table~\ref{tab:core-fit-sd} reports the sample standard deviations across the three fitting seeds (42, 43, and 44) corresponding to the mean accuracy and Macro-F1 scores across three seeds in Table~\ref{tab:corefull}. Table~\ref{tab:app-seed-draws} provides the individual test accuracies by seed at the 20\% swap target across all three independent test corruption draws (seeds 41001, 41002, and 41003), alongside the complete sweep across four swap targets ($0\%, 5\%, 10\%$, and $20\%$ swaps) for the \textbf{Scheduled Word CNN} ablation with seed 42.
+
+\input{tables/core_fit_variation}
+
+\begin{table}[!htbp]
+\centering\small
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+ & & \multicolumn{2}{c}{Original draw (41001)} & \multicolumn{2}{c}{Extra draw 1 (41002)} & \multicolumn{2}{c}{Extra draw 2 (41003)} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Model & Seed & Clean & Aug. & Clean & Aug. & Clean & Aug. \\
+\midrule
+Word TF-IDF LR & 42 & 89.14 & 89.22 & 88.92 & 89.20 & 89.04 & 89.03 \\
+ & 43 & 89.14 & 89.22 & 88.92 & 88.93 & 89.04 & 89.21 \\
+ & 44 & 89.14 & 89.33 & 88.92 & 89.07 & 89.04 & 89.12 \\
+\addlinespace
+Word CNN & 42 & 84.39 & 84.75 & 84.32 & 84.72 & 84.45 & 84.88 \\
+ & 43 & 84.11 & 84.34 & 84.14 & 84.63 & 84.54 & 84.55 \\
+ & 44 & 84.95 & 84.33 & 84.79 & 84.25 & 85.28 & 84.72 \\
+\addlinespace
+Subword CNN & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
+ & 43 & 85.99 & 86.34 & 85.39 & 85.76 & 85.95 & 85.95 \\
+ & 44 & 85.47 & 85.41 & 85.50 & 85.17 & 85.51 & 85.49 \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Scheduled Word CNN with seed 42 across official test swap targets (Acc.\ / Macro-F1, \%):}} \\
+\multicolumn{8}{@{}l}{Clean arm, 0\%: 87.22 / 87.21, \quad 5\%: 86.43 / 86.41, \quad 10\%: 86.21 / 86.18, \quad 20\%: 84.64 / 84.58} \\
+\multicolumn{8}{@{}l}{Aug.\ arm, 0\%: 87.17 / 87.18, \quad 5\%: 86.59 / 86.60, \quad 10\%: 86.14 / 86.15, \quad 20\%: 85.50 / 85.51} \\
+\bottomrule
+\end{tabular}
+\caption[Accuracy by seed across 20\% swap draws and Scheduled Word CNN sweep]{Individual test accuracies by fitting seed (\%) at the 20\% swap target across the three random swap draws (seeds 41001, 41002, and 41003), together with the full severity sweep for Scheduled Word CNN with seed 42.}
+\label{tab:app-seed-draws}
+\end{table}
+\FloatBarrier
+
+\section{Saved evidence}
+The project archive preserves aggregate metrics at full precision and measurements for each seed and condition. It also includes validation logs, results from the separate confirmation sample, paired bootstrap intervals, and results from the additional evaluations.

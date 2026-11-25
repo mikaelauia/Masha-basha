@@ -1,0 +1,117 @@
+\begin{longtable}{llrrrrr}
+\caption{All 112 aggregate conditions, each across three seeds. C/A: clean/augmented training. Accuracy, F1 and sample SD are percentage points.}\label{tab:fullmetrics}\\
+\toprule Model & Arm & Noise & Acc. & SD & Macro-F1 & SD \\ \midrule \endfirsthead
+\toprule Model & Arm & Noise & Acc. & SD & Macro-F1 & SD \\ \midrule \endhead
+Word TF-IDF LR & C & 0 & 90.053 & 0.000 & 90.033 & 0.000 \\
+Word TF-IDF LR & C & 5 & 89.842 & 0.000 & 89.822 & 0.000 \\
+Word TF-IDF LR & C & 10 & 89.605 & 0.000 & 89.588 & 0.000 \\
+Word TF-IDF LR & C & 20 & 89.145 & 0.000 & 89.119 & 0.000 \\
+Word TF-IDF LR & A & 0 & 90.105 & 0.026 & 90.091 & 0.025 \\
+Word TF-IDF LR & A & 5 & 89.987 & 0.099 & 89.973 & 0.099 \\
+Word TF-IDF LR & A & 10 & 89.794 & 0.008 & 89.780 & 0.008 \\
+Word TF-IDF LR & A & 20 & 89.259 & 0.061 & 89.238 & 0.062 \\
+Word CNN & C & 0 & 86.794 & 0.088 & 86.785 & 0.085 \\
+Word CNN & C & 5 & 86.118 & 0.194 & 86.104 & 0.182 \\
+Word CNN & C & 10 & 85.732 & 0.370 & 85.715 & 0.360 \\
+Word CNN & C & 20 & 84.482 & 0.428 & 84.460 & 0.402 \\
+Word CNN & A & 0 & 86.570 & 0.187 & 86.546 & 0.189 \\
+Word CNN & A & 5 & 85.974 & 0.130 & 85.949 & 0.133 \\
+Word CNN & A & 10 & 85.746 & 0.077 & 85.720 & 0.087 \\
+Word CNN & A & 20 & 84.474 & 0.239 & 84.444 & 0.238 \\
+Frozen BGE + neural head & C & 0 & 90.294 & 0.079 & 90.272 & 0.085 \\
+Frozen BGE + neural head & C & 5 & 90.167 & 0.072 & 90.145 & 0.082 \\
+Frozen BGE + neural head & C & 10 & 89.833 & 0.050 & 89.816 & 0.056 \\
+Frozen BGE + neural head & C & 20 & 89.412 & 0.150 & 89.396 & 0.145 \\
+Frozen BGE + neural head & A & 0 & 90.140 & 0.279 & 90.117 & 0.270 \\
+Frozen BGE + neural head & A & 5 & 89.982 & 0.239 & 89.962 & 0.229 \\
+Frozen BGE + neural head & A & 10 & 89.675 & 0.239 & 89.655 & 0.227 \\
+Frozen BGE + neural head & A & 20 & 89.360 & 0.211 & 89.344 & 0.200 \\
+Word + character LR & C & 0 & 90.500 & 0.000 & 90.481 & 0.000 \\
+Word + character LR & C & 5 & 90.237 & 0.000 & 90.220 & 0.000 \\
+Word + character LR & C & 10 & 90.066 & 0.000 & 90.048 & 0.000 \\
+Word + character LR & C & 20 & 89.474 & 0.000 & 89.452 & 0.000 \\
+Word + character LR & A & 0 & 90.197 & 0.023 & 90.180 & 0.021 \\
+Word + character LR & A & 5 & 90.000 & 0.013 & 89.983 & 0.013 \\
+Word + character LR & A & 10 & 89.974 & 0.060 & 89.954 & 0.061 \\
+Word + character LR & A & 20 & 89.518 & 0.095 & 89.491 & 0.098 \\
+Frozen BGE + LR & C & 0 & 90.211 & 0.000 & 90.191 & 0.000 \\
+Frozen BGE + LR & C & 5 & 89.855 & 0.000 & 89.837 & 0.000 \\
+Frozen BGE + LR & C & 10 & 89.697 & 0.000 & 89.682 & 0.000 \\
+Frozen BGE + LR & C & 20 & 89.105 & 0.000 & 89.089 & 0.000 \\
+Frozen BGE + LR & A & 0 & 90.057 & 0.020 & 90.036 & 0.019 \\
+Frozen BGE + LR & A & 5 & 89.868 & 0.121 & 89.848 & 0.123 \\
+Frozen BGE + LR & A & 10 & 89.675 & 0.053 & 89.659 & 0.053 \\
+Frozen BGE + LR & A & 20 & 89.136 & 0.042 & 89.120 & 0.042 \\
+Lexical + BGE LR & C & 0 & 91.882 & 0.000 & 91.867 & 0.000 \\
+Lexical + BGE LR & C & 5 & 91.684 & 0.000 & 91.670 & 0.000 \\
+Lexical + BGE LR & C & 10 & 91.355 & 0.000 & 91.340 & 0.000 \\
+Lexical + BGE LR & C & 20 & 90.921 & 0.000 & 90.907 & 0.000 \\
+Lexical + BGE LR & A & 0 & 91.833 & 0.038 & 91.816 & 0.037 \\
+Lexical + BGE LR & A & 5 & 91.662 & 0.066 & 91.647 & 0.066 \\
+Lexical + BGE LR & A & 10 & 91.272 & 0.061 & 91.257 & 0.060 \\
+Lexical + BGE LR & A & 20 & 90.978 & 0.055 & 90.960 & 0.053 \\
+Word TF-IDF SVM & C & 0 & 90.684 & 0.000 & 90.663 & 0.000 \\
+Word TF-IDF SVM & C & 5 & 90.447 & 0.000 & 90.426 & 0.000 \\
+Word TF-IDF SVM & C & 10 & 90.447 & 0.000 & 90.428 & 0.000 \\
+Word TF-IDF SVM & C & 20 & 89.789 & 0.000 & 89.763 & 0.000 \\
+Word TF-IDF SVM & A & 0 & 90.500 & 0.137 & 90.477 & 0.138 \\
+Word TF-IDF SVM & A & 5 & 90.377 & 0.086 & 90.355 & 0.088 \\
+Word TF-IDF SVM & A & 10 & 90.289 & 0.115 & 90.269 & 0.118 \\
+Word TF-IDF SVM & A & 20 & 89.746 & 0.163 & 89.717 & 0.165 \\
+Lexical + BGE SVM & C & 0 & 92.039 & 0.000 & 92.025 & 0.000 \\
+Lexical + BGE SVM & C & 5 & 91.829 & 0.000 & 91.813 & 0.000 \\
+Lexical + BGE SVM & C & 10 & 91.579 & 0.000 & 91.560 & 0.000 \\
+Lexical + BGE SVM & C & 20 & 91.289 & 0.000 & 91.272 & 0.000 \\
+Lexical + BGE SVM & A & 0 & 91.987 & 0.047 & 91.969 & 0.046 \\
+Lexical + BGE SVM & A & 5 & 91.807 & 0.053 & 91.788 & 0.054 \\
+Lexical + BGE SVM & A & 10 & 91.575 & 0.092 & 91.555 & 0.093 \\
+Lexical + BGE SVM & A & 20 & 91.373 & 0.053 & 91.352 & 0.055 \\
+BE-sort TF-IDF LR & C & 0 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & C & 5 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & C & 10 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & C & 20 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & A & 0 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & A & 5 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & A & 10 & 90.092 & 0.000 & 90.077 & 0.000 \\
+BE-sort TF-IDF LR & A & 20 & 90.092 & 0.000 & 90.077 & 0.000 \\
+Frozen BGE + tuned head & C & 0 & 90.632 & 0.205 & 90.617 & 0.204 \\
+Frozen BGE + tuned head & C & 5 & 90.386 & 0.106 & 90.369 & 0.099 \\
+Frozen BGE + tuned head & C & 10 & 89.934 & 0.228 & 89.918 & 0.221 \\
+Frozen BGE + tuned head & C & 20 & 89.496 & 0.188 & 89.479 & 0.179 \\
+Frozen BGE + tuned head & A & 0 & 90.601 & 0.133 & 90.575 & 0.132 \\
+Frozen BGE + tuned head & A & 5 & 90.469 & 0.115 & 90.446 & 0.118 \\
+Frozen BGE + tuned head & A & 10 & 90.114 & 0.214 & 90.084 & 0.220 \\
+Frozen BGE + tuned head & A & 20 & 89.715 & 0.122 & 89.687 & 0.125 \\
+Subword CNN & C & 0 & 87.175 & 0.292 & 87.151 & 0.290 \\
+Subword CNN & C & 5 & 86.754 & 0.100 & 86.724 & 0.101 \\
+Subword CNN & C & 10 & 86.623 & 0.357 & 86.583 & 0.361 \\
+Subword CNN & C & 20 & 85.316 & 0.762 & 85.256 & 0.795 \\
+Subword CNN & A & 0 & 87.320 & 0.270 & 87.294 & 0.265 \\
+Subword CNN & A & 5 & 87.022 & 0.381 & 86.994 & 0.374 \\
+Subword CNN & A & 10 & 86.719 & 0.622 & 86.688 & 0.622 \\
+Subword CNN & A & 20 & 85.772 & 0.500 & 85.731 & 0.489 \\
+Word + character LR control & C & 0 & 90.500 & 0.000 & 90.481 & 0.000 \\
+Word + character LR control & C & 5 & 90.237 & 0.000 & 90.220 & 0.000 \\
+Word + character LR control & C & 10 & 90.066 & 0.000 & 90.048 & 0.000 \\
+Word + character LR control & C & 20 & 89.474 & 0.000 & 89.452 & 0.000 \\
+Word + character LR control & A & 0 & 90.197 & 0.023 & 90.180 & 0.021 \\
+Word + character LR control & A & 5 & 90.000 & 0.013 & 89.983 & 0.013 \\
+Word + character LR control & A & 10 & 89.974 & 0.060 & 89.954 & 0.061 \\
+Word + character LR control & A & 20 & 89.518 & 0.095 & 89.491 & 0.098 \\
+Frozen BGE + LR control & C & 0 & 90.211 & 0.000 & 90.191 & 0.000 \\
+Frozen BGE + LR control & C & 5 & 89.855 & 0.000 & 89.837 & 0.000 \\
+Frozen BGE + LR control & C & 10 & 89.697 & 0.000 & 89.682 & 0.000 \\
+Frozen BGE + LR control & C & 20 & 89.105 & 0.000 & 89.089 & 0.000 \\
+Frozen BGE + LR control & A & 0 & 90.057 & 0.020 & 90.036 & 0.019 \\
+Frozen BGE + LR control & A & 5 & 89.868 & 0.121 & 89.848 & 0.123 \\
+Frozen BGE + LR control & A & 10 & 89.675 & 0.053 & 89.659 & 0.053 \\
+Frozen BGE + LR control & A & 20 & 89.136 & 0.042 & 89.120 & 0.042 \\
+Lexical + BGE LR control & C & 0 & 91.882 & 0.000 & 91.867 & 0.000 \\
+Lexical + BGE LR control & C & 5 & 91.684 & 0.000 & 91.670 & 0.000 \\
+Lexical + BGE LR control & C & 10 & 91.355 & 0.000 & 91.340 & 0.000 \\
+Lexical + BGE LR control & C & 20 & 90.921 & 0.000 & 90.907 & 0.000 \\
+Lexical + BGE LR control & A & 0 & 91.833 & 0.038 & 91.816 & 0.037 \\
+Lexical + BGE LR control & A & 5 & 91.662 & 0.066 & 91.647 & 0.066 \\
+Lexical + BGE LR control & A & 10 & 91.272 & 0.061 & 91.257 & 0.060 \\
+Lexical + BGE LR control & A & 20 & 90.978 & 0.055 & 90.960 & 0.053 \\
+\bottomrule\end{longtable}

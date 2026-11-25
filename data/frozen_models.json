@@ -1,0 +1,122 @@
+{
+  "models": {
+    "word_svm": {
+      "kind": "linear",
+      "method": "word",
+      "canonical": false,
+      "params": {
+        "C": 0.5,
+        "char_weight": 0.5,
+        "classifier": "svm",
+        "embedding_weight": 1.0
+      },
+      "development_objective": 0.8985531862645986,
+      "reference": "lr"
+    },
+    "word_char_tuned": {
+      "kind": "linear",
+      "method": "word_char",
+      "canonical": false,
+      "params": {
+        "C": 2.0,
+        "char_weight": 0.5,
+        "classifier": "lr",
+        "embedding_weight": 1.0
+      },
+      "development_objective": 0.8975400514289911,
+      "reference": "word_char"
+    },
+    "bge_reg": {
+      "kind": "linear",
+      "method": "bge_linear",
+      "canonical": false,
+      "params": {
+        "C": 2.0,
+        "char_weight": 0.5,
+        "classifier": "lr",
+        "embedding_weight": 1.0
+      },
+      "development_objective": 0.9000435549781285,
+      "reference": "bge_linear"
+    },
+    "hybrid_tuned": {
+      "kind": "linear",
+      "method": "hybrid",
+      "canonical": false,
+      "params": {
+        "C": 2.0,
+        "char_weight": 0.5,
+        "classifier": "lr",
+        "embedding_weight": 1.0
+      },
+      "development_objective": 0.9127311540328897,
+      "reference": "hybrid"
+    },
+    "hybrid_svm": {
+      "kind": "linear",
+      "method": "hybrid",
+      "canonical": false,
+      "params": {
+        "C": 0.5,
+        "char_weight": 0.5,
+        "classifier": "svm",
+        "embedding_weight": 1.0
+      },
+      "development_objective": 0.9104492972052578,
+      "reference": "hybrid"
+    },
+    "be_sort": {
+      "kind": "linear",
+      "method": "word",
+      "canonical": true,
+      "params": {
+        "C": 8.0,
+        "char_weight": 0.5,
+        "classifier": "lr",
+        "embedding_weight": 1.0
+      },
+      "development_objective": 0.8976793274173738,
+      "reference": "lr"
+    },
+    "encoder_head_tuned": {
+      "kind": "head",
+      "params": {
+        "head_dropout": 0.2,
+        "head_lr": 0.003
+      },
+      "development_objective": 0.9024014436697338,
+      "reference": "encoder"
+    },
+    "cnn_optimized": {
+      "kind": "cnn",
+      "variant": "subword",
+      "params": {
+        "epochs": 16,
+        "patience": 4
+      },
+      "development_objective": 0.8720001580763519,
+      "reference": "cnn"
+    }
+  },
+  "checkpoint_hashes": {
+    "development\\seed_42\\clean\\word_svm.joblib": "e7c00798392ac7809fcdacb9f890f651f74e12c00cdd4c3025c767f5e3f731d8",
+    "development\\seed_42\\augmented\\word_svm.joblib": "b1ac37664705f8fee95b1140c66fadc0a7be00739b51ccf436b181d08c4772a8",
+    "development\\seed_42\\clean\\word_char_tuned.joblib": "19be29abefa3a6120e5a2143579b754df796cb3510f1384911f6e46f486bc753",
+    "development\\seed_42\\augmented\\word_char_tuned.joblib": "6305a1ef0d5c7ecd470c159f82aedd76370dfd62e98a6689bc8c92b9a0f056d1",
+    "development\\seed_42\\clean\\bge_reg.joblib": "31056a7f613056f4706559ee9c9e62a04874fa6f7539eca5ab5fa91444b48410",
+    "development\\seed_42\\augmented\\bge_reg.joblib": "181f63e5dc8c681eb65bdf0b41154aba062abe5e641eb08dde4c1287250507be",
+    "development\\seed_42\\clean\\hybrid_tuned.joblib": "ac9a925feaadb78b4707db3b2a173e77a848731a2016249c5ebf1ea16a186303",
+    "development\\seed_42\\augmented\\hybrid_tuned.joblib": "689e6dd35daa7893a0c3f14a7be14ae233f7b3a6ea2a5b38166d8c5c0abe31d3",
+    "development\\seed_42\\clean\\hybrid_svm.joblib": "68d85a9bbf66961d85573c9cbed9b1d81ba292493d0de4fe25309144ee5fc8b6",
+    "development\\seed_42\\augmented\\hybrid_svm.joblib": "0baab24755171f040652bad3c386a5aadcbb0e66bd9d473c2af51d73157db117",
+    "development\\seed_42\\clean\\be_sort.joblib": "c4af2dde590c0238a979d470eecdad78ffac63203cfe7cf9f5e6ca4e0f19692f",
+    "development\\seed_42\\augmented\\be_sort.joblib": "c4af2dde590c0238a979d470eecdad78ffac63203cfe7cf9f5e6ca4e0f19692f",
+    "development\\seed_42\\clean\\encoder_head_tuned.pt": "bcb764395b00d9d10f29f197d69846b38be159e32389864ca4d0ef5cf0785fdd",
+    "development\\seed_42\\augmented\\encoder_head_tuned.pt": "fa0e85f30ddec22e8dba134f7617406be5460ac7cef88037d95e10d112413d2c",
+    "development\\seed_42\\clean\\cnn_optimized.pt": "e0e576782ae185020120db2089e6e77384f124976fcdc655566e90190bcc7102",
+    "development\\seed_42\\augmented\\cnn_optimized.pt": "503c3a6050c432e1c9aa8966e9b9033c86369820b64f170623e59db34f93bca6"
+  },
+  "recipes_frozen_utc": "2026-11-02T12:19:27.015888+00:00",
+  "test_opened": false,
+  "confirmation_scored": false
+}

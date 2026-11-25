@@ -1,0 +1,159 @@
+\chapter{Methodology}\label{ch:method}
+
+\section{Dataset curation, preprocessing, and partitioning}
+Our experiments use a complete CSV mirror of the titles and descriptions in the AG News corpus \citep{agmirror,zhang2015} that preserves the exact splits of 120,000 training articles and 7,600 test articles provided by the standard \texttt{torchtext} benchmark loader \citep{torchtext}. Figure~\ref{fig:data-partitions} summarizes how the raw corpus is filtered and partitioned into disjoint subsets for model fitting, validation selection, separate confirmation, and final testing.
+
+\begin{figure}[!b]
+\centering
+\includegraphics[width=.94\linewidth]{figures/data_partitions.pdf}
+\caption[Data filtering and partitions]{Filtering and stratified partitioning of the AG News dataset. Training articles whose normalized text exactly matches an official test article are removed before drawing the disjoint training, validation, and separate confirmation partitions.}
+\label{fig:data-partitions}
+\end{figure}
+
+The data ingestion pipeline assigns every article a permanent identifier (\texttt{source\_id}) composed of its source split name and row index starting at zero, and maps the four topic labels (\emph{World}, \emph{Sports}, \emph{Business}, and \emph{Sci/Tech}) to integer class indices $0, 1, 2, 3$. Because this identifier travels with the record across all preprocessing and corruption stages, we can pair predictions made on clean and corrupted views of the exact same article throughout our analysis. Only the text fields (title and description) serve as model input.
+
+All models share an identical text normalization pipeline. For each article, we concatenate the title and description separated by a space, convert all characters to lowercase, extract contiguous runs of ASCII letters via the regular expression \artifact{[a-z]+}, truncate the resulting sequence to at most 128 words, and rejoin the tokens with single spaces. Under this tokenization rule, hyphenated compounds split into separate words, while digits, punctuation, and currency symbols are discarded. We intentionally omit stemming, lemmatization, and removal of common words so that both the linear baseline and the convolutional networks observe the natural word order and morphological structure of the text. Treating the concatenated title and description as a single sequence also allows bigrams and convolutional windows to bridge the boundary between headline and lead sentence.
+
+To prevent data leakage and label noise, a filter checks for exact matches in normalized strings truncated to 128 words across the training pool of 120,000 articles before any splitting occurs. The filter removes 38 training articles whose normalized text matches an official test article exactly. It also removes 79 training articles from duplicate groups with conflicting topic labels and 326 redundant copies of repeated training texts, keeping the first occurrence of each. Exact string matching eliminates articles that become identical after normalization and truncation, although near duplicates covering the same news event can still remain. The official test split of 7,600 articles (1,900 per class) is left completely unaltered so that test evaluations remain comparable to standard benchmark structure, even though one normalized text appears twice within the official test set.
+
+From the 119,557 clean articles in the training pool that survive deduplication, our splitter shuffles the articles within each class using seed 2026 and extracts disjoint partitions balanced by class: a training set of 20,000 articles (5,000 per topic) and a validation set of 4,000 articles (1,000 per topic). All model fits in the main comparison reuse these training and validation partitions. A separate confirmation sample of 4,000 articles (1,000 per topic) is drawn from the unused portion of the filtered training pool, excluding records touched during preliminary sanity checks. This provides an untouched evaluation set after model recipes and checkpoints fitted with seed 42 were frozen. An audit after splitting verified that this confirmation sample shares neither source identifiers nor normalized text strings with the training, validation, or official test partitions.
+
+Truncating inputs to 128 words defines the fixed sequence width for the padded neural inputs while ensuring that the TF-IDF baseline scores the exact same portion of every document. An audit of token counts before truncation revealed that only 18 of the 20,000 training articles and five of the 7,600 official test articles exceed 128 words. The length cap bounds memory allocation without discarding substantive content. By contrast, stripping characters other than letters removes surface cues whose prevalence differs across categories. As shown in Figure~\ref{fig:normalization-cues}, currency symbols appear in 17.0\% of raw Business training articles compared with at most 6.0\% in any other category, whereas numeric digits appear frequently across all four topics (ranging from 47.4\% in World to 70.0\% in Sports). Our audit quantifies what normalization removes. Isolating the downstream accuracy impact of retaining digits or currency symbols would require a separate preprocessing ablation.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/normalization_cues.pdf}
+\caption[Raw cues removed by normalization]{Percentage of the 20,000 selected training articles (5,000 per topic) that contain numeric digits or currency symbols prior to alphabetic normalization.}
+\label{fig:normalization-cues}
+\end{figure}
+
+\section{Controlled spelling corruption and training arms}\label{sec:noise}
+We model typographical noise through deterministic transpositions of unequal adjacent interior letters. Formally, a normalized word is \emph{eligible} for corruption if it has length at least four and contains at least one adjacent pair of interior characters (excluding the first and last letters) that are not identical. Short words of three or fewer letters (such as \texttt{the} or \texttt{oil}) and words with uniform interior letters (such as \texttt{seen}) have no eligible interior pair and remain unchanged.
+
+For each article, the corruption algorithm initializes an independent pseudorandom number generator seeded jointly by the global corruption seed and the article's stable \texttt{source\_id}. Making the random stream a function of the article identifier guarantees that every article receives the exact same edits regardless of batching or corpus ordering. Scanning the eligible words of an article from left to right, the generator draws both a uniform trigger value $u \in [0, 1)$ and a uniformly chosen unequal adjacent interior letter pair for every eligible word, whether or not that word is ultimately modified. When $u < p$ for a specified target swap probability $p$, the algorithm transposes the chosen interior pair. It leaves the word intact when the trigger does not pass. Because every severity level is generated from the clean normalized text using the same underlying random numbers $(u, \mathrm{pair})$ per word, increasing the swap target $p$ produces strictly nested corruptions: every word swapped at $p = 5\%$ remains swapped in the exact same way at $p = 10\%$ and $p = 20\%$, alongside additional newly triggered swaps.
+
+Listing~\ref{lst:swap-word} shows the decision for a single word. Both random draws are made before the threshold check, so changing the target does not change the candidate pair.
+
+\begin{lstlisting}[language=Python,keywordstyle=\color{darkgreen},caption={[Core logic for swapping letters in one word]Core logic for swapping letters in one word. The counters are omitted.},label={lst:swap-word},float=htbp]
+def swap_word(word, probability, rng):
+    candidates = [i for i in range(1, len(word) - 2)
+                  if word[i] != word[i + 1]]
+    if not candidates:
+        return word
+    draw, index = rng.random(), rng.choice(candidates)
+    if draw >= probability:
+        return word
+    return word[:index] + word[index + 1] + word[index] + word[index + 2:]
+\end{lstlisting}
+
+Throughout the study, validation selection evaluates models at $p \in \{0\%, 10\%\}$, the main official test sweep evaluates $p \in \{0\%, 5\%, 10\%, 20\%\}$ (using test corruption seed 41001), the separate confirmation check evaluates $p \in \{0\%, 10\%\}$, and a additional sensitivity check generates two additional independent test draws at $p = 20\%$ (using corruption seeds 41002 and 41003). Figure~\ref{fig:swap-exposure} illustrates the relationship between the nominal swap target for eligible words $p$ and realized corruption exposure across the 7,600 official test articles (which contain 289,990 total words, of which 187,152 are eligible). At the highest target of $p = 20\%$, 20.03\% of eligible words undergo a letter transposition (12.93\% of all test words, or 37,494 words). At this target, 99.1\% of test articles (7,533 of 7,600) contain at least one misspelled word. Because a typical news item contains around two dozen eligible words, nearly every article experiences some perturbation even when the vast majority of individual tokens remain clean.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/swap_exposure.pdf}
+\caption[Realized exposure to spelling swaps]{Realized corruption exposure across the 7,600 official test articles as a function of the swap target for eligible words $p$. Left: percentage of all test tokens modified. Right: percentage of test articles containing at least one modified word.}
+\label{fig:swap-exposure}
+\end{figure}
+
+To investigate whether exposure to spelling swaps during fitting improves model resilience, we train every architecture under two parallel training arms.
+
+\subsection{Clean training arm}
+All 20,000 training articles are presented in their original, uncorrupted normalized form.
+
+\subsection{Augmented training arm}
+Within each fitting seed, we randomly sample 50\% of the training articles in each topic (2,500 per class, 10,000 articles total) without replacement and corrupt the selected articles at the $p = 10\%$ swap target. The corrupted text replaces the clean version of the selected article in place, preserving the corpus size of 20,000 articles, with exactly 5,000 per class.
+
+In the augmented arm, the fitting seed governs both which 10,000 training articles are selected for corruption and the random letter swaps applied within them via distinct random streams. For fitting seed 42, 9,082 of the 10,000 selected training articles experience at least one edit, modifying 24,791 of the 766,601 total training tokens (3.23\%). Seeds 43 and 44 modify 24,803 and 24,728 tokens, respectively. The augmented training corpus is constructed once per fitting seed and held static across all models and training epochs. Because replacement substitutes corrupted tokens for clean ones prior to vocabulary construction, static augmentation alters both the fitted vocabulary (and document frequencies) and the training examples seen by the classifier, while reducing the number of times clean canonical spellings are observed.
+
+\section{Baseline and neural architectures}\label{sec:models}
+All three primary pipelines accept the same normalized article strings and output four class logits, as illustrated in Figure~\ref{fig:model-flow}.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/core_prediction_flow.pdf}
+\caption[From normalized article to topic scores]{Processing pipelines from normalized text to scores for four topics. Subword CNN enriches the token representation with hashed character fragment vectors before applying the exact same convolutional and pooling layers as Word CNN.}\label{fig:model-flow}
+\end{figure}
+
+\subsection{Word TF-IDF Logistic Regression baseline}
+Our baseline extracts word unigrams and adjacent word bigrams by splitting the already normalized string on single spaces, ensuring exact token parity with the neural models. The \texttt{TfidfVectorizer} learns its vocabulary and inverse document frequency weights exclusively from the active training arm. We require a term to appear in at least two training documents ($\mathrm{min\_df} = 2$) to filter out isolated hapax legomena (including single training typos in the augmented arm) and cap the vocabulary at the top 50,000 terms by corpus frequency, applying the sublinear TF-IDF weighting and $L_2$ row normalization defined in Chapter~\ref{ch:background}.
+
+The resulting 20,000 $\times$ 50,000 training design matrix is stored in compressed sparse row format. Validation and test splits are transformed using the frozen training vocabulary and document frequencies. Any word or bigram created by a spelling swap during testing that does not match a retained training term simply drops out of the active feature vector. On top of these features, a multinomial logistic regression classifier optimizes four weight vectors of dimension 50,000 and four scalar intercepts (200,004 learned parameters in total) via L-BFGS for up to 1,000 iterations with an $L_2$ penalty controlled by inverse regularization strength $C$. Within each training arm and seed, the pipeline evaluates $C \in \{0.5, 2.0, 8.0\}$ on the validation objective $J(f)$, selecting $C = 2.0$ under clean training and a weaker penalty of $C = 8.0$ across all three augmented training seeds.
+
+\subsection{Word CNN}
+Word CNN begins by constructing a word lookup table from the active training arm. Tokens are ranked by descending training frequency with ties broken alphabetically, and the top 29,998 words are assigned integer indices $2, \dots, 29{,}999$. Index 0 is reserved for padding on the right, and index 1 represents the shared unknown token (\texttt{<unk>}), yielding a vocabulary with 30,000 rows. At validation and test time, any word outside those 29,998 retained tokens maps to index 1. A swapped spelling can retain its own entry in the vocabulary, especially under augmented training. In the original 20\% test draw, 60.9\% of the swapped tokens appeared in the vocabulary fitted on augmented text with seed 42.
+
+For a batch of $B$ articles, the encoder outputs an integer matrix of shape $B \times 128$ (padded with zeros on the right) alongside an integer vector recording the true unpadded word count $\ell \in \{1, \dots, 128\}$ of each article. Looking up these indices in the 30,000 $\times$ 96 embedding table produces a tensor of shape $B \times 128 \times 96$. All trainable embedding rows (including the \texttt{<unk>} row) are initialized from a standard normal distribution $\mathcal{N}(0, 1)$, whereas the padding row at index 0 is initialized to zero and kept frozen throughout training.
+
+During the forward pass, the embedding tensor is transposed to $B \times 96 \times 128$ so that the 96 embedding dimensions act as input channels over the 128 sequence positions. Three parallel convolutional layers along the sequence apply 64 filters each with kernel widths $k \in \{3, 4, 5\}$ and stride 1, followed by a biased rectified linear unit ($\operatorname{ReLU}$) activation. On a sequence of padded length 128, a filter of width $k$ yields $128 - k + 1$ window activations. To prevent padding tokens on the right from artificially inflating filter outputs on shorter documents, our pooling stage applies an explicit length mask: for an article with $\ell$ true words, only the first $\max(1, \ell - k + 1)$ window positions are retained, while all trailing positions that overlap padding are masked to $-\infty$ prior to taking the maximum over time. (If an article has fewer than $k$ words, retaining the first window ensures a finite output.) Concatenating the 64 maximum activations from each of the three kernel widths yields a document representation with 192 values. During training, dropout with probability $p_{\mathrm{drop}} = 0.5$ zeroes random coordinates of this pooled vector before a final linear layer maps the 192 features to four topic logits. At evaluation time, dropout is disabled. Figure~\ref{fig:word-cnn-forward} summarizes the tensor shapes for a single article.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/word_cnn_forward.pdf}
+\caption[CNN input and output shapes]{Tensor dimensions during the forward pass for a single article in Word CNN and Subword CNN. Both architectures use the same convolution, max pooling with padding masked, dropout, and linear classification stages. Subword CNN adds the mean of hashed character fragment vectors to each word embedding prior to convolution.}\label{fig:word-cnn-forward}
+\end{figure}
+
+\subsection{Subword CNN}
+Subword CNN preserves the same rule for the vocabulary of 30,000 entries, filter widths ($k \in \{3, 4, 5\}$), channel counts (64 per width), max pooling with padding masked, dropout rate ($0.5$), and linear output head of Word CNN. However, its encoder also retains the raw surface spelling of every token at each sequence position. Retaining the surface string is crucial because two distinct misspelled words that both fall back to the shared \texttt{<unk>} word ID (index 1) can still have different sets of character n-grams.
+
+To extract subword features for a word $w$, the fragment extractor flanks the token with start and end boundary symbols (\texttt{<} and \texttt{>}) and enumerates all contiguous character n-grams of lengths 3, 4, and 5 from left to right. If a word generates more than 16 fragments, the extractor deterministically subsamples 16 fragments at evenly spaced indices across the list so that prefix, interior, and suffix regions all remain represented within a fixed limit per word. Each selected fragment string $g$ is mapped via a deterministic hash function $h(g)$ to one of 8,192 bucket indices ($1, \dots, 8{,}192$, with index 0 reserved as a frozen zero padding row for words with fewer than 16 fragments). Hashing bounds the subword parameter table to a fixed size of $8{,}193 \times 96 = 786{,}528$ scalars without requiring a precomputed character n-gram dictionary, while guaranteeing that any surviving character fragment of a misspelling at test time maps to the exact same embedding bucket learned during training.
+
+In the forward pass, the model looks up the current word embedding with 96 dimensions $e_{\mathrm{word}}(w)$ and adds the arithmetic mean of the trainable fragment embeddings, each with 96 dimensions, corresponding to the selected fragment occurrences $G(w)$:
+\begin{equation}
+e(w) = e_{\mathrm{word}}(w) + \frac{1}{|G(w)|}\sum_{g \in G(w)} e_{\mathrm{char}}\bigl(h(g)\bigr).
+\end{equation}
+If a fragment occurs multiple times in $G(w)$, its bucket vector contributes proportionally to the mean. Padding rows (index 0) are excluded from the denominator $|G(w)|$, and an empty fragment list contributes zero. For efficiency, the data loader computes and caches the list of 16 bucket indices once per unique word string in a split, while the neural network performs live embedding lookups and vector averaging on every training batch so that gradients flow into both $e_{\mathrm{word}}$ and $e_{\mathrm{char}}$.
+
+Table~\ref{tab:cnn-parameter-breakdown} compares the parameter counts of the two neural architectures. Each width-$k$ convolutional layer contains $64 \times (96k + 1)$ parameters, totaling 73,920 convolutional weights and biases across $k \in \{3, 4, 5\}$, and the linear classification head contains $4 \times (192 + 1) = 772$ parameters. Adding the fragment embedding table with 8,193 rows increases the total parameter count by 26.6\%, from 2,954,692 scalars in Word CNN (and Scheduled Word CNN) to 3,741,220 scalars in Subword CNN.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Architecture component & Word CNN & Subword CNN \\
+\midrule
+Word embedding table ($30{,}000 \times 96$) & 2,880,000 & 2,880,000 \\
+Convolutional filters and biases ($k \in \{3, 4, 5\}$, 64 each) & 73,920 & 73,920 \\
+Linear classification head ($192 \times 4 + 4$) & 772 & 772 \\
+Character fragment embedding table ($8{,}193 \times 96$) & 0 & 786,528 \\
+\midrule
+Total stored parameters & 2,954,692 & 3,741,220 \\
+\bottomrule
+\end{tabular}
+\caption[CNN parameter breakdown]{Parameter breakdown for the convolutional architectures. Embedding counts include the frozen zero padding rows. Scheduled Word CNN has the exact same parameter counts as Word CNN.}
+\label{tab:cnn-parameter-breakdown}
+\end{table}
+
+\subsection{Tracing a single article from input to prediction}
+To illustrate how a concrete document flows through all three pipelines, Table~\ref{tab:article-trace} follows official test article 0 (\emph{Fears for T N pension after talks}, a Business story regarding union discussions over a company pension plan). Concatenating the title and description bridges the boundary at \texttt{talks unions}, and alphabetic normalization strips the quotation marks around \texttt{disappointed}, yielding a sequence of 25 words fed identically to each model trained on clean text with seed 42.
+
+\begin{table}[!htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{32mm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Pipeline stage & Representation and scoring behavior on official test article 0 \\
+\midrule
+Word TF-IDF LR & The string of 25 words activates 29 nonzero coordinates (unigrams and bigrams) out of the 50,000 fitted TF-IDF features. Multiplying this sparse vector with $L_2$ normalization by the learned $4 \times 50{,}000$ weight matrix plus intercepts yields four class logits. \\
+\addlinespace
+Word CNN & The encoder maps the 25 words to integer vocabulary IDs followed by 103 padding IDs of zero ($\ell = 25$). After embedding lookup ($128 \times 96$) and convolution, filters of widths 3, 4, and 5 compute maxima with padding excluded over the first 23, 22, and 21 valid windows, respectively, producing a pooled vector with 192 values. \\
+\addlinespace
+Subword CNN & Each of the 25 active positions additionally gathers its hashed character fragment bucket IDs (for example, \texttt{pension} yields 16 fragments of lengths 3--5). The averaged fragment vectors are added to the word embeddings before the same 23, 22, and 21 valid windows pass through convolution and max pooling. \\
+\addlinespace
+Final prediction & All three models trained on clean text with seed 42 assign the highest logit to Business (class 2), matching the true label and saved test prediction logs. \\
+\bottomrule
+\end{tabularx}
+\caption[One article through the three models]{Trace of official test article 0 (25 normalized words, true class Business) through the models trained on clean text with seed 42.}
+\label{tab:article-trace}
+\end{table}
+
+Notice how sequence length interacts differently with the sparse and neural pipelines. Although the CNNs allocate a fixed buffer of 128 positions, the true word count $\ell = 25$ restricts max pooling to the 23, 22, and 21 windows that lie entirely within the actual article text, ignoring the remaining 103 padded positions. For the linear baseline, sparsity is governed instead by vocabulary intersection: only the 29 unigrams and bigrams present in the article that also occurred in at least two training documents receive nonzero weights.
+
+\section{Training procedure, loss calculation, and checkpoint selection}
+Both neural architectures are trained using stochastic gradient updates with a batch size of $B = 128$ articles (with a smaller final batch at the end of each epoch if needed). Given the four raw topic logits $z_{i,1}, \dots, z_{i,4}$ produced for each article $i$ in a batch, the training loop computes the mean cross-entropy loss across classes:
+\begin{equation}
+L = -\frac{1}{B}\sum_{i=1}^{B} \log P(y_i \mid x_i) = -\frac{1}{B}\sum_{i=1}^{B} \log \frac{\exp(z_{i, y_i})}{\sum_{j=1}^{4}\exp(z_{i,j})}.
+\end{equation}
+Because cross-entropy measures the negative log likelihood of the true class $y_i$, the training loss continues to decrease whenever the network widens the logit margin in favor of the correct category, even after the argmax prediction is already correct. On every batch, previous gradients are zeroed, backpropagation propagates error derivatives through the linear head, maxima selected by pooling, and convolutional kernels down to the word (and character fragment) embedding tables, and the global $L_2$ norm of all parameter gradients is clipped at 5.0 to prevent exploding updates. Parameters are then updated using AdamW \citep{adamw} with an initial learning rate of $10^{-3}$ and decoupled weight decay of $10^{-4}$.
+
+Each epoch consists of one full pass over the 20,000 training articles, shuffled according to the fitting seed (42, 43, or 44), which also initializes the neural weights. Training loss for each epoch is the exact average of the batch losses weighted by batch size. At the conclusion of every epoch, the network switches to evaluation mode (disabling dropout) and scores both the clean validation set ($0\%$ swaps) and the corrupted validation set ($10\%$ swaps). Checkpoint selection is governed by the unweighted mean of Macro-F1 across those two validation views. A candidate epoch overwrites the stored best checkpoint if and only if its combined validation score exceeds the best previously recorded score by more than $10^{-6}$ on the $[0, 1]$ scale.
+
+Under its original baseline training schedule, \textbf{Word CNN} trains for up to 8 epochs with an early stopping patience of 2 epochs without validation improvement and a constant learning rate of $10^{-3}$. By contrast, \textbf{Subword CNN} and our control for the training schedule, \textbf{Scheduled Word CNN}, train for up to 16 epochs with an early stopping patience of 4 epochs and a \texttt{ReduceLROnPlateau} scheduler that halves the learning rate whenever the validation objective fails to improve for 2 consecutive epochs. Once training terminates, the loop restores the weights from the epoch with the highest validation score and serializes the model state dictionary, hyperparameter configuration, selected epoch index, and fitted vocabulary of 30,000 entries to disk.
+
+The verification utility reconstructs each predictor from its saved artifacts. It loads the paired vectorizer and linear classifier for Word TF-IDF LR. For Word CNN and Subword CNN, it rebuilds the network, restores checkpoint weights, and encodes text with the saved vocabulary and fragment hash. Replay verification confirms that identifiers and labels align and that every restored model reproduces its saved predictions for each article (see Appendix~\ref{app:repro}).

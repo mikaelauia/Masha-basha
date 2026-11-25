@@ -1,0 +1,25 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "C:\\Users\\Administrator\\Desktop\\Master AI\\1. sem\\Machine Learning\\Project\\.venv-ml\\Scripts\\python.exe",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "processor": "AMD64 Family 23 Model 96 Stepping 1, AuthenticAMD",
+  "logical_cpus": 4,
+  "torch_threads": 4,
+  "device": "cpu",
+  "cuda_device": null,
+  "packages": {
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "torch": "2.14.1+cpu",
+    "matplotlib": "3.11.2",
+    "joblib": "1.6.0",
+    "transformers": "4.57.6",
+    "huggingface-hub": "0.36.2",
+    "safetensors": "0.8.0",
+    "tokenizers": "0.22.2"
+  },
+  "main_py_sha256": "7249128c7d298cffdf137e9255b5852f2d96c429604432aad75307cc6cde9a84",
+  "pretrained_py_sha256": "ecac4caa7dcaa0dc8bc7a949eb34aa84bedabe7fb81a94a202996eeeb476d4ac",
+  "started_utc": "2026-10-29T11:19:00.776458+00:00"
+}

@@ -1,0 +1,16 @@
+{
+  "results\\04_final_comparison\\metrics.csv": "17f7f0f937d63ed1a04f473401238ffedb214adbb62037b483cce9bfb3a70b27",
+  "results\\04_final_comparison\\summary.csv": "5c71f9d03ecfbe7739fb89a4b4730023850efa89f6df1a5d041166267e04dfc2",
+  "results\\04_final_comparison\\paired_accuracy_analysis.json": "11e8289e8fbcfbd16224d8739044a74690bcf92d4e2261dd98056cafde2f801e",
+  "results\\04_final_comparison\\confirmation_results.json": "0506ae3c1d1f0b2ca414844d401fb5cc6c9f69b33074c68e98192cab30f7cc6e",
+  "results\\04_final_comparison\\frozen_models.json": "eeef3350f44e45f2fbd87657636bf7fe9de1c307321b6a0477f387774e488658",
+  "results\\04_final_comparison\\optimization_plan.json": "f82a7d00a06f01e6b09f5cd4d106456245f91b4f6d3ecb3f3eb321b1f656f208",
+  "results\\04_final_comparison\\artifact_verification.json": "fba008989a9fb40dfac873cfbdca3855983d83adf361e6d6dfce4c9626e3bb45",
+  "results\\04_final_comparison\\cost_summary.json": "893257e8f2d29cf717de59431870f4226829810e8919f930374e0a362be80683",
+  "results\\04_final_comparison\\fit_events.json": "bd9aa32756f92af348a467ac18ed879f43cad0508d4a09f18f2489b22097b582",
+  "results\\04_final_comparison\\encoding_events.json": "5fd32d3b44a8309f2413052721836212d128fa35bcc8d8b8dbdd09032df9a50e",
+  "results\\01_baselines\\environment.json": "8ab1a810812002330db34b2fa1825174cf3afab3b3057f0020438c06130ee530",
+  "results\\01_baselines\\config.json": "1b76ce68b295f97de7f8a7f6c106fbb5eca8311c0548e59f4223867b6a5a10e5",
+  "results\\01_baselines\\corruption_stats.json": "7dbeb8ad957b8a5d495a5a40700a60a1d7ef219664f8a11f09ac8a61d77585e6",
+  "results\\03_cnn_development\\validation_comparison.csv": "0b87eca0efc926dfbd1010d04b42f99c47c1696e6b8463408fb71c8ef545cedc"
+}

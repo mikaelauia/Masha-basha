@@ -1,0 +1,11 @@
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrrr}\toprule
+True topic & World & Sports & Business & Sci/Tech \\\midrule
+World & \textbf{1,672} & 79 & 54 & 95 \\
+Sports & 102 & \textbf{1,742} & 13 & 43 \\
+Business & 187 & 41 & \textbf{1,352} & 320 \\
+Sci/Tech & 110 & 30 & 105 & \textbf{1,655} \\
+\bottomrule
+\end{tabular}
+\caption[Confusion matrix for Subword CNN trained on clean text at 20\% swaps]{Confusion matrix on the official test set at the 20\% swap target for Subword CNN trained on clean text (seed 42). Rows correspond to true topics (1,900 articles per row) and columns correspond to predicted topics. Diagonal entries in bold indicate correct classifications.}\label{tab:confusion-review}
+\end{table}

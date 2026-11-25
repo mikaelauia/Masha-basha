@@ -1,0 +1,75 @@
+\chapter{Discussion and limitations}\label{ch:discussion}
+
+\section{Answering the research questions}
+
+\subsection{Research Question 1}
+\emph{How does classification performance change as spelling swaps become more frequent, and how do the neural models compare with the lexical baseline?}
+
+Across all evaluated corruption levels, every model trained on clean text loses accuracy as adjacent interior letter swaps become more frequent, but the linear baseline proves substantially more resilient than either convolutional network. Between clean text ($0\%$ swaps) and the highest corruption target ($20\%$ swaps), \textbf{Word TF-IDF LR} drops by only $0.91$ percentage points ($90.05\%$ to $89.14\%$), compared with $1.86$ percentage points for \textbf{Subword CNN} ($87.18\%$ to $85.32\%$) and $2.31$ percentage points for \textbf{Word CNN} ($86.79\%$ to $84.48\%$). The baseline leads at every swap target (Figure~\ref{fig:core-robustness}), maintains its lead across both additional random swap draws at $20\%$, and confirms the same ordering on the separate confirmation set of 4,000 articles.
+
+A natural structural explanation for this resilience lies in how sparse linear models and convolutional networks with max pooling aggregate evidence across a document. In Word TF-IDF LR, each retained unigram or bigram contributes additively to the class logits across the entire news item of 25 to 50 words. At the $20\%$ swap target for eligible words, $99.1\%$ of test articles contain at least one typo. Only $12.93\%$ of all test tokens are altered, leaving roughly $87\%$ of the words in a typical article intact. When a swap invalidates one word and its adjacent bigrams, the linear classifier still sums evidence over dozens of uncorrupted topical terms elsewhere in the headline and description. In a CNN with global max pooling over the sequence, by contrast, each of the 192 filters forwards only its single highest window activation across the entire document. If a swapped word sits inside the window of 3, 4, or 5 words that produced a filter's global maximum, or if replacing it with \texttt{<unk>} alters the winning window, the pooled feature passed to the classification head changes directly. Consistent with this mechanism, our paired transition analysis (Figure~\ref{fig:paired-changes}) shows that Word TF-IDF LR trained on clean text flips its correctness decision on only $215$ test articles at $20\%$ swaps ($6.1\%$ instability across repeated $20\%$ swap draws), whereas both CNNs flip correctness on nearly $500$ articles ($11.3\%$--$11.8\%$ instability across draws).
+
+Inspecting errors at the topic and article level reveals that aggregate accuracy drops tell only part of the story. For the baseline trained on clean text with seed 42, a net loss of 69 correct predictions at $20\%$ swaps is the residual of 142 newly induced errors offset by 73 previously misclassified articles that became correct after a swap suppressed a competing cue. Across topics, neural errors concentrate heavily in \emph{Business} (Table~\ref{tab:topic-correct-change}), which accounts for roughly $90\%$ of the net accuracy loss in both CNNs fitted with seed 42 as corrupted corporate or financial terms shift predictions toward \emph{Sci/Tech} and \emph{World}. Simultaneously, both CNNs classify more true \emph{World} articles correctly at $20\%$ swaps ($+28$ and $+31$ articles) while suffering drops in World $F_1$ of $2.98$ and $3.17$ percentage points, respectively. In Subword CNN, 184 more articles from other topics are incorrectly predicted as World. In a practical pipeline for routing news, this asymmetric shift would flood the World feed with misrouted Business and Sci/Tech stories even as World recall appears to improve.
+
+\subsection{Research Question 2}
+\emph{Does static swap augmentation improve accuracy on corrupted articles while preserving accuracy on clean text?}
+
+Replacing half of the training articles in each class with versions generated at the $10\%$ swap target yields a modest, positive mean gain for \textbf{Subword CNN} at the $20\%$ swap target: $+0.46$ percentage points on the original draw (pointwise 95\% bootstrap interval over articles $[+0.03, +0.90]$ percentage points) and $+0.39$ and $+0.31$ percentage points on the two additional draws (Table~\ref{tab:augmentation-draws}). By contrast, \textbf{Word TF-IDF LR} gains only $+0.08$ to $+0.14$ percentage points (which also reflects the change in regularization selected on validation data, from $C = 2.0$ to $C = 8.0$), and \textbf{Word CNN} shows differences close to zero that change sign across draws ($-0.01$, $+0.12$, and $-0.04$ percentage points). Because Subword CNN represents words through shared character fragments, training on corrupted tokens updates shared fragment embeddings, including those for prefixes and suffixes. These embeddings can also help represent test misspellings that map to \texttt{<unk>}. Word CNN represents misspellings using their own learned entries when available and the shared \texttt{<unk>} embedding otherwise. Words seen once can be retained if they rank among the 29,998 words selected by frequency.
+
+Nevertheless, two findings qualify the practical value of static replacement augmentation.
+
+\subsubsection{Variation across runs}
+Subword CNN's positive mean across three seeds masks substantial variation across fitting seeds: seed 42 gained roughly $+1.0$ percentage point across all three $20\%$ swap draws, seed 43 gained $+0.36$ to $+0.37$ points in two draws and tied in the third, and seed 44 lost $-0.03$ to $-0.33$ points in every draw. Because each fitting seed varies both the neural initialization/batch order and which 10,000 training articles are selected for corruption, the benefit of static augmentation is not guaranteed on every single training run.
+
+\subsubsection{Tradeoff on clean text}
+Replacing half of the clean training articles in place reduces how often the model observes canonical spellings during fitting. While the augmentation differences averaged across three seeds on clean official test text have confidence intervals spanning zero, the check on 4,000 separate articles for Subword CNN (seed 42) shows that a gain of $+0.60$ percentage points at $10\%$ swaps came alongside a drop of $0.45$ percentage points on clean text, calculated before rounding ($88.12\%$ to $87.68\%$, Table~\ref{tab:held-out-review}).
+
+\subsection{Does any neural or augmentation improvement justify the extra training cost?}
+From an engineering standpoint, neither neural architecture justifies its substantially higher computational cost on this task and label budget. As shown in Table~\ref{tab:fit-cost-review}, \textbf{Word TF-IDF LR} fits its vectorizer and evaluates all three regularization candidates in a median of 13 seconds on four CPU threads, whereas \textbf{Word CNN} requires a median of 219 seconds (about $17\times$ as long) and \textbf{Subword CNN} requires a median of 642 seconds (about $50\times$ as long, based on the unrounded medians) while still trailing the linear baseline by more than 2.7 percentage points on clean text and more than 3.4 percentage points at $20\%$ swaps. Within the neural family, Subword CNN (and augmented training) does improve accuracy on corrupted text relative to the Word CNN trained for 8 epochs, but at nearly triple the training time and still well below the linear baseline at 13 seconds.
+
+\section{Internal validity, schedule confounding, and limitations}
+A central methodological finding of our study is that the $1.30$ percentage point advantage of augmented Subword CNN over the original augmented Word CNN at $20\%$ swaps combines two distinct modifications: adding the character fragment table with 786,528 parameters and extending the training schedule from 8 epochs (patience 2, fixed learning rate) to 16 epochs (patience 4, plateau learning rate halving). Our schedule ablation with seed 42 (\textbf{Scheduled Word CNN}, Table~\ref{tab:scheduled-review}) isolates the schedule change by holding the Word CNN architecture and its 2,954,692 parameters fixed. On the official test set at $20\%$ swaps, giving Word CNN the schedule of up to 16 epochs closes nearly the entire augmented gap ($85.50\%$ for Scheduled Word CNN vs.\ $85.57\%$ for Subword CNN and $84.75\%$ for Word CNN trained for 8 epochs) and slightly surpasses Subword CNN under clean training ($84.64\%$ vs.\ $84.49\%$).
+
+The validation learning curves in Figure~\ref{fig:learning} show that Subword CNN outperformed Scheduled Word CNN by up to $+1.78$ percentage points throughout epochs 2 to 8 in both training arms. This lead came before any run used a reduced learning rate. Scheduled Word CNN first used the lower rate at epoch 12 in both training arms. Subword CNN first used it at epoch 15 under clean training and epoch 11 under augmented training. That early validation advantage occurred under identical learning rates and epoch counts, when the two models differed only in the presence of the character fragment table and its extra parameters. How much of Subword CNN's behavior reflects genuine subword generalization across misspelled stems (as illustrated in Table~\ref{tab:observed-swap}) versus increased embedding capacity or altered optimization dynamics therefore remains an open question that requires a factorial experiment with matched parameter counts and training schedules.
+
+Several broader limitations also bound the scope of our conclusions.
+
+\subsection{Exploratory test exposure and selection bias}
+The early baseline and neural experiments used the official test split before we designed the CNN validation screen. We therefore treat the subsequent neural comparisons as exploratory \citep{cawley2010}. Reusing a finite validation split across multiple design iterations can also introduce mild selection optimism. We mitigated this risk by freezing all recipes for later runs and evaluating the frozen models fitted with seed 42 once on a separate confirmation sample of 4,000 previously unused articles, which confirmed the exact ranking of all three pipelines at $0\%$ and $10\%$ swaps.
+
+\subsection{Distinct sources of uncertainty}
+Our pointwise 95\% intervals from the paired bootstrap over articles quantify sampling variation across the 7,600 test articles conditional on the fixed model checkpoints and swap draw. They do not capture variance across new training splits, wider seed ensembles (we used three fitting seeds for tractability on CPU), or alternative corruption types. Pairing the bootstrap intervals with markers for each seed (Figure~\ref{fig:augmentation-review}) and two extra random swap draws (Table~\ref{tab:augmentation-draws}) provides a more complete picture of uncertainty.
+
+\subsection{Scope of the perturbation model}
+Transposing unequal adjacent interior letters preserves word length, word boundaries, and the first and last letters of every word. Typographical and OCR noise in practice also includes character insertions, deletions, substitutions between adjacent keys, and errors at word boundaries, which can disrupt prefix/suffix fragments (\texttt{<co}, \texttt{mer>}) that interior swaps leave intact. In addition, because our swap target $p$ applies to eligible words ($\ge 4$ letters with unequal interior pairs), applying the same nominal $p$ to a domain with shorter or longer average word lengths would alter a different fraction of total words. Reporting realized token corruption ($12.93\%$ at $p = 20\%$) is therefore essential for comparisons across corpora.
+
+\subsection{Ambiguity from assigning one label and event overlap}
+AG News assigns a single topic label to each article even when a story genuinely spans multiple domains (such as government telecommunications regulation or corporate sports sponsorships). While our preprocessing filter removed exact normalized text duplicates between training and test splits, different wire stories covering the same news event remain across splits. Evaluating generalization to entirely novel future events would require a split by time or by event.
+
+\Needspace{17\baselineskip}
+\section{Priorities for future work}
+Building on these findings, we identify three focused priorities for a confirmation study.
+
+\subsection{A full CNN factorial experiment with matched parameter counts}
+To cleanly separate the contribution of character fragment representations from training schedule and parameter count, we would evaluate the $2 \times 2$ factorial design shown in Table~\ref{tab:proposed-cnn-design} across all three fitting seeds and both training arms, adding a fourth cell that runs Subword CNN under the shorter schedule of up to 8 epochs and matching total embedding parameters (for example, by adjusting word vocabulary size or embedding dimension so both architectures have $\approx 3.0\mathrm{M}$ parameters).
+
+\begin{table}[!htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Token representation & Short schedule (8 epochs, patience 2, constant LR) & Long schedule (16 epochs, patience 4, plateau LR decay) \\
+\midrule
+Words only & \textbf{Word CNN} (evaluated across 3 seeds) & \textbf{Scheduled Word CNN} (evaluated at seed 42, extend to 3 seeds) \\
+Words + character fragments & \textbf{Subword CNN with the shorter schedule} (missing control cell) & \textbf{Subword CNN} (evaluated across 3 seeds) \\
+\bottomrule
+\end{tabularx}
+\caption[Proposed factorial CNN comparison]{A $2 \times 2$ factorial design crossing token representation with training schedule. Running all four cells across multiple matched seeds and equalized parameter budgets would isolate representational gains from optimization effects.}
+\label{tab:proposed-cnn-design}
+\end{table}
+
+\subsection{Direct mechanistic tests of sensitivity to individual cues}
+To test our hypothesis regarding why global max pooling is more brittle than additive TF-IDF scoring, we would perform targeted experiments that perturb one word at a time on fixed test articles. We would compare classification margin shifts when swapping a word that holds a high TF-IDF weight or sits inside a CNN filter's winning pooling window versus swapping a word with low weight or outside the winning window in the same document.
+
+\subsection{Dynamic augmentation and decoupled corruption seeds}
+Static augmentation selects half of the training set before epoch 1. At seed 42, 9,082 of the 10,000 selected articles receive at least one swap. Those edited articles are presented only in their modified form. Future experiments could compare static replacement with dynamic corruption in each epoch (where every article is seen in clean form in some epochs and corrupted form in others) while varying the training corruption seed independently of the neural initialization seed.
+

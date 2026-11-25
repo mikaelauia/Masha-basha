@@ -1,0 +1,431 @@
+{
+  "original_swap_seed": 41001,
+  "additional_views": [
+    {
+      "seed": 41002,
+      "words": 289990,
+      "eligible_words": 187152,
+      "changed_words": 37519,
+      "changed_documents": 7531,
+      "requested_probability": 0.2,
+      "documents": 7600,
+      "changed_fraction_all_words": 0.12938032345942962,
+      "changed_fraction_eligible_words": 0.20047341198597932
+    },
+    {
+      "seed": 41003,
+      "words": 289990,
+      "eligible_words": 187152,
+      "changed_words": 37297,
+      "changed_documents": 7534,
+      "requested_probability": 0.2,
+      "documents": 7600,
+      "changed_fraction_all_words": 0.12861477981999378,
+      "changed_fraction_eligible_words": 0.199287210395828
+    }
+  ],
+  "scheduled_checkpoint_seed": 42,
+  "model_fit_seeds": [
+    42,
+    43,
+    44
+  ],
+  "results": [
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41001,
+      "rate": 0.0,
+      "accuracy": 0.8722368421052632,
+      "macro_f1": 0.8721364662924769
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41001,
+      "rate": 0.05,
+      "accuracy": 0.8643421052631579,
+      "macro_f1": 0.8641195439486646
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41001,
+      "rate": 0.1,
+      "accuracy": 0.8621052631578947,
+      "macro_f1": 0.8618273077591042
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41001,
+      "rate": 0.2,
+      "accuracy": 0.8464473684210526,
+      "macro_f1": 0.8458331332171991
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41001,
+      "rate": 0.0,
+      "accuracy": 0.8717105263157895,
+      "macro_f1": 0.8717702436782692
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41001,
+      "rate": 0.05,
+      "accuracy": 0.8659210526315789,
+      "macro_f1": 0.8660238636892881
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41001,
+      "rate": 0.1,
+      "accuracy": 0.8614473684210526,
+      "macro_f1": 0.8615490295516977
+    },
+    {
+      "model": "scheduled-word-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41001,
+      "rate": 0.2,
+      "accuracy": 0.855,
+      "macro_f1": 0.8550661029071598
+    },
+    {
+      "model": "word-lr",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8892105263157895,
+      "macro_f1": 0.8889956647333979
+    },
+    {
+      "model": "word-lr",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8903947368421052,
+      "macro_f1": 0.8901236955100189
+    },
+    {
+      "model": "word-lr",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8919736842105264,
+      "macro_f1": 0.8918091955712351
+    },
+    {
+      "model": "word-lr",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8902631578947369,
+      "macro_f1": 0.8900619489505192
+    },
+    {
+      "model": "word-lr",
+      "seed": 43,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8892105263157895,
+      "macro_f1": 0.8889956647333979
+    },
+    {
+      "model": "word-lr",
+      "seed": 43,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8903947368421052,
+      "macro_f1": 0.8901236955100189
+    },
+    {
+      "model": "word-lr",
+      "seed": 43,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8893421052631579,
+      "macro_f1": 0.8891703100150227
+    },
+    {
+      "model": "word-lr",
+      "seed": 43,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8921052631578947,
+      "macro_f1": 0.8918769298170838
+    },
+    {
+      "model": "word-lr",
+      "seed": 44,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8892105263157895,
+      "macro_f1": 0.8889956647333979
+    },
+    {
+      "model": "word-lr",
+      "seed": 44,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8903947368421052,
+      "macro_f1": 0.8901236955100189
+    },
+    {
+      "model": "word-lr",
+      "seed": 44,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8906578947368421,
+      "macro_f1": 0.8905672096825835
+    },
+    {
+      "model": "word-lr",
+      "seed": 44,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8911842105263158,
+      "macro_f1": 0.890940413155084
+    },
+    {
+      "model": "word-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8431578947368421,
+      "macro_f1": 0.8424398491713123
+    },
+    {
+      "model": "word-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8444736842105263,
+      "macro_f1": 0.8437932314809411
+    },
+    {
+      "model": "word-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8472368421052632,
+      "macro_f1": 0.8469970191274606
+    },
+    {
+      "model": "word-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8488157894736842,
+      "macro_f1": 0.8483837255133736
+    },
+    {
+      "model": "word-cnn",
+      "seed": 43,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8414473684210526,
+      "macro_f1": 0.841930815064051
+    },
+    {
+      "model": "word-cnn",
+      "seed": 43,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8453947368421053,
+      "macro_f1": 0.8456672901679636
+    },
+    {
+      "model": "word-cnn",
+      "seed": 43,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8463157894736842,
+      "macro_f1": 0.8459348141897247
+    },
+    {
+      "model": "word-cnn",
+      "seed": 43,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8455263157894737,
+      "macro_f1": 0.8451984070462017
+    },
+    {
+      "model": "word-cnn",
+      "seed": 44,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8478947368421053,
+      "macro_f1": 0.8475171395811818
+    },
+    {
+      "model": "word-cnn",
+      "seed": 44,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8527631578947369,
+      "macro_f1": 0.8523304988652944
+    },
+    {
+      "model": "word-cnn",
+      "seed": 44,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8425,
+      "macro_f1": 0.8422265282521915
+    },
+    {
+      "model": "word-cnn",
+      "seed": 44,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8472368421052632,
+      "macro_f1": 0.8467239134670074
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8419736842105263,
+      "macro_f1": 0.8409852317902624
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 42,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8463157894736842,
+      "macro_f1": 0.8455468592694038
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.853421052631579,
+      "macro_f1": 0.8531614596260242
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 42,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8559210526315789,
+      "macro_f1": 0.8556236357841824
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 43,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8539473684210527,
+      "macro_f1": 0.8535816002265598
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 43,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8594736842105263,
+      "macro_f1": 0.8591784985633922
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 43,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8576315789473684,
+      "macro_f1": 0.8570743517712418
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 43,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8594736842105263,
+      "macro_f1": 0.8590351138576314
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 44,
+      "arm": "clean",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.855,
+      "macro_f1": 0.8545648521331147
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 44,
+      "arm": "clean",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8551315789473685,
+      "macro_f1": 0.8548028465791042
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 44,
+      "arm": "augmented",
+      "corruption_seed": 41002,
+      "rate": 0.2,
+      "accuracy": 0.8517105263157895,
+      "macro_f1": 0.851524056151106
+    },
+    {
+      "model": "subword-cnn",
+      "seed": 44,
+      "arm": "augmented",
+      "corruption_seed": 41003,
+      "rate": 0.2,
+      "accuracy": 0.8548684210526316,
+      "macro_f1": 0.854535804473648
+    }
+  ]
+}

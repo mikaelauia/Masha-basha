@@ -1,0 +1,92 @@
+{
+  "validation": {
+    "0.0": {
+      "words": 152915,
+      "eligible_words": 98563,
+      "changed_words": 0,
+      "changed_documents": 0,
+      "requested_probability": 0.0,
+      "documents": 4000,
+      "changed_fraction_all_words": 0.0,
+      "changed_fraction_eligible_words": 0.0
+    },
+    "0.1": {
+      "words": 152915,
+      "eligible_words": 98563,
+      "changed_words": 9782,
+      "changed_documents": 3613,
+      "requested_probability": 0.1,
+      "documents": 4000,
+      "changed_fraction_all_words": 0.06397017951149331,
+      "changed_fraction_eligible_words": 0.09924616742591033
+    }
+  },
+  "test": {
+    "0.0": {
+      "words": 289990,
+      "eligible_words": 187152,
+      "changed_words": 0,
+      "changed_documents": 0,
+      "requested_probability": 0.0,
+      "documents": 7600,
+      "changed_fraction_all_words": 0.0,
+      "changed_fraction_eligible_words": 0.0
+    },
+    "0.05": {
+      "words": 289990,
+      "eligible_words": 187152,
+      "changed_words": 9407,
+      "changed_documents": 5277,
+      "requested_probability": 0.05,
+      "documents": 7600,
+      "changed_fraction_all_words": 0.032439049622400774,
+      "changed_fraction_eligible_words": 0.0502639565700607
+    },
+    "0.1": {
+      "words": 289990,
+      "eligible_words": 187152,
+      "changed_words": 18915,
+      "changed_documents": 6900,
+      "requested_probability": 0.1,
+      "documents": 7600,
+      "changed_fraction_all_words": 0.06522638711679712,
+      "changed_fraction_eligible_words": 0.10106758143113619
+    },
+    "0.2": {
+      "words": 289990,
+      "eligible_words": 187152,
+      "changed_words": 37494,
+      "changed_documents": 7533,
+      "requested_probability": 0.2,
+      "documents": 7600,
+      "changed_fraction_all_words": 0.1292941135901238,
+      "changed_fraction_eligible_words": 0.20033983072582714
+    }
+  },
+  "augmentation": {
+    "42": {
+      "selected_documents": 10000,
+      "total_documents": 20000,
+      "words": 766601,
+      "eligible_words": 493315,
+      "changed_words": 24791,
+      "changed_documents": 9082
+    },
+    "43": {
+      "selected_documents": 10000,
+      "total_documents": 20000,
+      "words": 766601,
+      "eligible_words": 493315,
+      "changed_words": 24803,
+      "changed_documents": 9112
+    },
+    "44": {
+      "selected_documents": 10000,
+      "total_documents": 20000,
+      "words": 766601,
+      "eligible_words": 493315,
+      "changed_words": 24728,
+      "changed_documents": 9078
+    }
+  }
+}

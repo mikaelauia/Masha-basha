@@ -1,0 +1,8 @@
+{
+  "new_prediction_sets_verified": 192,
+  "all_new_metrics_recomputed": true,
+  "all_new_predictions_identical": true,
+  "be_sort_internal_swap_invariance": true,
+  "baseline_rows_are_saved_references": true,
+  "reference_checkpoint_metric_sets_verified": 144
+}
