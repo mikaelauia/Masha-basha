@@ -32,9 +32,10 @@
   "undefined_references": 0,
   "missing_characters": 0,
   "visual_review": "Rendered with pdfLaTeX+BibTeX; contents and lists each fit one page; no solitary-float or few-line spillover pages.",
-  "report_pdf_sha256": "f748f1bd35a5ff470f3830d0f8d4db0954958cef997251a3f82fabcad3a9d147",
+  "report_pdf_sha256": "402645a07bd922b4cb39ca015cc76a5da35e4b8786e9c3932ff799c39d948774",
   "standalone_zip_compile_verified": true,
   "standalone_zip_pdf_text_matches_exported_pdf": true,
   "held_out_augmentation_contrasts_verified": 2,
-  "pdf_pages_total": 34
+  "pdf_pages_total": 34,
+  "text_audit": "Scripted scan for duplicate words, spacing, dashes, undefined refs/cites: clean. Key metrics re-verified against saved results."
 }

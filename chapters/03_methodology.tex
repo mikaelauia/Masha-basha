@@ -132,7 +132,7 @@ Word TF-IDF LR & Activates 29 of 50,000 fitted unigrams and bigrams; multiplying
 \addlinespace
 Word CNN & Maps 25 word IDs plus 103 zero pads to $128 \times 96$ embeddings; width-3, 4, and 5 filters max-pool over 23, 22, and 21 valid windows to form 192 features. \\
 \addlinespace
-Subword CNN & Adds 16-fragment bucket means per active word (for example, \texttt{pension} yields 16 fragments of lengths 3--5) before pooling over the same 23, 22, and 21 valid windows. \\
+Subword CNN & Adds a bucket mean of up to 16 fragments per active word (for example, \texttt{pension} yields 16 fragments of lengths 3--5) before pooling over the same 23, 22, and 21 valid windows. \\
 \addlinespace
 Final prediction & All three clean-trained (seed 42) models assign the highest logit to Business (class 2), matching the true label and saved test logs. \\
 \bottomrule
