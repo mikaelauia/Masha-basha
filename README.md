@@ -9,7 +9,7 @@ This report investigates four-class topic classification on AG News under reprod
 - `main.tex`: Master LaTeX document.
 - `config/`: Package preamble (`preamble.tex`) and report metadata (`metadata.tex`).
 - `frontmatter/`: University of Agder title page (`titlepage.tex`) and abstract (`abstract.tex`).
-- `chapters/`: Chapters 1–7 covering Introduction, Background, Methodology, Experimental Design, Results, Discussion and Limitations, and Conclusion.
+- `chapters/`: Chapters 1–7 covering Introduction, Background, Methodology, Experimental Design, Results, Discussion, and Conclusion.
 - `appendices/`: Detailed model configurations and seed-level/follow-up tables (`a_decision_register.tex`), reproducibility instructions (`c_reproducibility.tex`), and AI assistance disclosure (`d_ai_statement.tex`).
 - `figures/`, `tables/`, `data/`: Precomputed vector PDF figures, LaTeX table fragments, and verified JSON/CSV experimental outputs.
 - `project_requirements.pdf`: Official five-page IKT466 course project specification.

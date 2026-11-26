@@ -1,42 +1,45 @@
 \chapter{Background}\label{ch:background}
 
-\section{Sparse lexical representations and linear classifiers}
+\section{Sparse linear models}
 Although all three models in our main comparison read the exact same normalized article text, they convert that text into numerical features in fundamentally different ways. The linear baseline aggregates document-wide term statistics into a sparse vector with many dimensions, whereas the convolutional networks represent the article as an ordered sequence of dense token vectors and learn local phrase detectors. Consequently, a single character transposition disrupts the evidence available to each model through distinct mechanisms.
 
 Our baseline represents each document using weighted counts of individual words (unigrams) and adjacent word pairs (bigrams), where each retained vocabulary term corresponds to one coordinate of the feature vector. Because a short news item contains only a tiny fraction of the overall vocabulary, nearly all coordinates in a document vector are zero. Including bigrams alongside unigrams distinguishes multi-word expressions and topical phrases from isolated words; although an interior spelling swap invalidates that word's unigram and up to two adjacent bigrams, dozens of uncorrupted topical words typically remain active to supply strong class evidence. As \citet{wang2012} demonstrated, regularized linear classifiers over unigram and bigram features provide a competitive baseline for sentiment and topic classification.
 
+\paragraph{TF-IDF weighting.}
 Rather than using raw counts, we weight each retained feature using TF-IDF with sublinear term frequency. For a term $t$ appearing $f_{td} > 0$ times in document $d$, the unnormalized weight is
 \begin{equation*}
 a_{td} = (1 + \log f_{td})\left(1 + \log\frac{1 + N}{1 + \mathrm{df}_t}\right),
 \end{equation*}
 where $N$ denotes the number of training documents and $\mathrm{df}_t$ is the number of training documents containing $t$ \citep{tfidf}. The logarithmic term-frequency factor dampens repeated occurrences of a word within one article, while the smoothed inverse document frequency factor downweights ubiquitous words across the corpus. Dividing the resulting vector by its Euclidean ($L_2$) norm gives every nonzero document vector unit length, ensuring that scores depend on the relative profile of active terms rather than raw article length.
 
+\paragraph{Logistic regression.}
 Multinomial logistic regression maps a normalized document vector $x \in \mathbb{R}^D$ to linear class logits $z_k = w_k^\top x + b_k$ for each topic $k \in \{1, 2, 3, 4\}$, with weight vector $w_k \in \mathbb{R}^D$ and intercept $b_k \in \mathbb{R}$, converting them into posterior probabilities via the softmax function \citep{logisticregression}:
 \begin{equation}
 P(y = k \mid x) = \frac{\exp(z_k)}{\sum_{j=1}^{4}\exp(z_j)}.
 \end{equation}
 At inference time, the classifier predicts the topic with the highest logit $z_k$. Training minimizes $L_2$-penalized multinomial cross-entropy: whereas $L_2$ document normalization scales each input vector $x$ prior to scoring, $L_2$ weight regularization constrains $w_k$ during optimization so individual lexical features do not receive excessive weight.
 
-\section{Neural text representations and convolutional architectures}
+\section{Convolutional networks}
 Following \citet{kim2014}, \textbf{Word CNN} represents an article as an ordered sequence of learned dense word embeddings, mapping any word outside the fitted vocabulary to a single shared unknown (\texttt{<unk>}) vector. Parallel convolution filters slide across contiguous windows of $k$ words, sharing weights across all sequence positions so each filter serves as a position-invariant detector for local phrase patterns in the title or description.
 
 To aggregate variable-length filter maps into a fixed-width document vector, global max pooling retains only each filter's single highest activation across valid windows, discarding both window position and repetition count. Under this mechanism, a spelling swap alters every window spanning the corrupted word, yet changes the pooled feature value only if one of those windows previously held or newly surpasses the filter's global maximum. Because convolutional filters take continuous inner products across multi-word windows, uncorrupted neighboring words within a window can still produce partial activation even when a central word becomes \texttt{<unk>}.
 
+\paragraph{Subword enrichment.}
 Drawing on the subword enrichment principle of FastText \citep{bojanowski2017}, \textbf{Subword CNN} sums each token's word embedding (or \texttt{<unk>} when out of vocabulary) with the mean of learned embeddings for its contiguous character n-grams (fragments) before convolution. When an interior letter pair is transposed, fragments spanning the swapped letters are disrupted, whereas fragments covering the prefix, suffix, or unaffected stem remain intact and preserve partial lexical signal beyond \texttt{<unk>}. Unlike pretrained FastText vectors, all word and character-fragment embeddings in our study are trained jointly from scratch on AG News.
 
 During training, dropout randomly zeroes pooled filter activations on each forward pass to prevent filter co-adaptation. Parameters are optimized with AdamW, which decouples weight decay from adaptive gradient updates \citep{adamw}, while validation early stopping selects checkpoints before overfitting sets in (Chapter~\ref{ch:method}).
 
-\paragraph{Worked example: tracing an observed spelling swap.}
+\paragraph{Observed swap example.}
 Official test article 47, a Sci/Tech story reporting Dell's exit from China's budget consumer PC market, illustrates how these representations differ in practice. Under the 5\% swap target, the only edit alters \texttt{china consumer pc} to \texttt{china cosnumer pc}. Because \texttt{consumer} recurs unedited later in the article, Word TF-IDF LR keeps its unigram coordinate active, though losing one occurrence lowers its $L_2$-normalized TF-IDF weight by roughly 40\%. Table~\ref{tab:observed-swap} contrasts how the three clean-trained (seed 42) models represent this edit at its document position.
 
 \begin{table}[htbp]
 \centering\small
 \input{tables/observed_swap_features}
-\caption[Representations of an observed spelling swap]{How the three models trained on clean text (seed 42) represent the \texttt{consumer} $\to$ \texttt{cosnumer} swap in official test article 47. In Subword CNN, six of the 16 selected character fragments map to identical hash buckets before and after the swap.}
+\caption[Observed swap representations]{How the three models trained on clean text (seed 42) represent the \texttt{consumer} $\to$ \texttt{cosnumer} swap in official test article 47. In Subword CNN, six of the 16 selected character fragments map to identical hash buckets before and after the swap.}
 \label{tab:observed-swap}
 \end{table}
 
-\section{Measuring classification performance and robustness}
+\section{Measuring robustness}
 Sensitivity to character edits is a well-documented NLP vulnerability: \citet{belinkov2018} showed that natural typos and synthetic character swaps severely degrade neural machine translation, while \citet{pruthi2019} demonstrated that adversarial character edits sharply reduce classification accuracy without a dedicated word-recognition front end. Rather than adding a separate spelling-correction stage, we evaluate intrinsic robustness from the classifier's input representation (sparse n-grams, word embeddings, or subword fragments) and from training directly on corrupted examples. Whereas \citet{wei2019} generated extra training instances through word-level synonym replacement, insertion, swapping, and deletion, our static augmentation applies within-word letter swaps in place across half of the clean training articles, holding total sample count and class balance constant.
 
 We report overall accuracy (the share of articles assigned to their true topic) and macro-averaged $F_1$ (Macro-F1). For topic $k$, precision $P_k$ and recall $R_k$ combine into $F_{1,k} = 2 P_k R_k / (P_k + R_k)$ (set to zero if $P_k + R_k = 0$), which Macro-F1 averages equally across the four balanced topics.

@@ -1,8 +1,8 @@
-\chapter{Configurations and additional runs}\label{app:decisions}\label{app:fullresults}
+\chapter{Additional details}\label{app:decisions}\label{app:fullresults}
 
 In the final three-seed comparison, Subword CNN reuses its seed-42 validation-screen checkpoint alongside fits at seeds 43 and 44 under the same selection rule; \textbf{Scheduled Word CNN} uses its frozen seed-42 validation-screen checkpoints.
 
-\section{Hyperparameter configurations}
+\section{Model settings}
 Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and optimization specifications across the shared 20,000-article training and 4,000-article validation splits.
 
 \begin{table}[!htbp]
@@ -19,12 +19,12 @@ Scheduled Word CNN & Identical Word CNN architecture (2,954,692 scalars); $\le 1
 Subword CNN & Scheduled Word CNN schedule plus $8{,}193 \times 96$ fragment table ($+786{,}528$ scalars; 3,741,220 total); \texttt{<} and \texttt{>} boundary markers, 3--5 character n-grams, $\le 16$ evenly spaced fragments hashed into $1 \dots 8{,}192$, mean added to word embedding before convolution. \\
 \bottomrule
 \end{tabularx}
-\caption[Detailed model and training configurations]{Summary of preprocessing, feature extraction, architecture, and optimization settings.}
+\caption[Model and training settings]{Summary of preprocessing, feature extraction, architecture, and optimization settings.}
 \label{tab:app-hyperparams}
 \end{table}
 \FloatBarrier
 
-\section{Variation across fitting seeds and additional evaluation runs}
+\section{Seed-level results}
 Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003, alongside the full $0\%, 5\%, 10\%$, and $20\%$ sweep for seed-42 \textbf{Scheduled Word CNN}.
 
 \input{tables/core_fit_variation}
@@ -54,10 +54,10 @@ Subword CNN & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
 \multicolumn{8}{@{}l}{Aug.\ arm, 0\%: 87.17 / 87.18, \quad 5\%: 86.59 / 86.60, \quad 10\%: 86.14 / 86.15, \quad 20\%: 85.50 / 85.51} \\
 \bottomrule
 \end{tabular}
-\caption[Accuracy by seed across 20\% swap draws and Scheduled Word CNN sweep]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003, plus the full swap sweep for seed-42 Scheduled Word CNN.}
+\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003, plus the full swap sweep for seed-42 Scheduled Word CNN.}
 \label{tab:app-seed-draws}
 \end{table}
 \FloatBarrier
 
-\paragraph{Saved evidence archive.}
+\paragraph{Evidence archive.}
 The project archive stores full-precision aggregate and seed-level metrics, validation histories, confirmation-set predictions, paired bootstrap intervals, and all follow-up outputs.
