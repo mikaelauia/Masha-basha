@@ -1,12 +1,12 @@
 \begin{table}[!htbp]\centering\small
 \begin{tabular}{lrrr}\toprule
 Model & Stored scalars & Epochs or solver & Recorded fit time (s) \\\midrule
-Word TF-IDF LR & 200,004 & L-BFGS ($\le 1{,}000$ iter.) & 11--15 (median 13) \\
-Word CNN & 2,954,692 & 8 epochs (patience 2) & 202--241 (median 219) \\
-Scheduled Word CNN & 2,954,692 & 16 epochs (patience 4) & 501--514 (seed 42 only) \\
-Subword CNN & 3,741,220 & 14--16 epochs (patience 4) & 551--779 (median 642) \\
+Word TF-IDF LR & 200,004 & L-BFGS ($\le 1{,}000$ iter.) & 11 to 15 (median 13) \\
+Word CNN & 2,954,692 & 8 epochs (patience 2) & 202 to 241 (median 219) \\
+Scheduled Word CNN & 2,954,692 & 16 epochs (patience 4) & 501 to 514 (seed 42 only) \\
+Subword CNN & 3,741,220 & 14 to 16 epochs (patience 4) & 551 to 779 (median 642) \\
 \bottomrule
 \end{tabular}
-\caption[Parameters and fit times]{Stored parameters and CPU fit times across six runs per core model (three seeds $\times$ two arms) and two seed-42 Scheduled Word CNN runs. Word TF-IDF LR counts weights and intercepts, with timing covering vectorization and $C \in \{0.5, 2, 8\}$ tuning; neural counts include frozen padding rows, with timing covering encoding, updates, and per-epoch validation.}
+\caption[Parameters and fit times]{Stored parameters and CPU fit times across six runs per core model (three seeds $\times$ two arms) and two seed-42 Scheduled Word CNN runs. Word TF-IDF LR counts weights and intercepts, with timing covering vectorization and $C \in \{0.5, 2, 8\}$ tuning. Neural counts include frozen padding rows, with timing covering encoding, updates, and per-epoch validation.}
 \label{tab:fit-cost-review}
 \end{table}

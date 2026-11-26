@@ -1,9 +1,9 @@
 \chapter{Additional details}\label{app:decisions}\label{app:fullresults}
 
-In the final three-seed comparison, Subword CNN reuses its seed-42 validation-screen checkpoint alongside fits at seeds 43 and 44 under the same selection rule; \textbf{Scheduled Word CNN} uses its frozen seed-42 validation-screen checkpoints.
+In the final three-seed comparison, Subword CNN reuses its seed-42 validation-screen checkpoint alongside fits at seeds 43 and 44 under the same selection rule, and \textbf{Scheduled Word CNN} uses its frozen seed-42 validation-screen checkpoints.
 
 \section{Model settings}
-Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and optimization specifications across the shared 20,000-article training and 4,000-article validation splits.
+Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and optimization settings across the shared 20,000-article training and 4,000-article validation splits.
 
 \begin{table}[!htbp]
 \centering\footnotesize
@@ -11,12 +11,12 @@ Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and opti
 \toprule
 Pipeline component & Configuration details \\
 \midrule
-Shared preprocessing & Concatenate title and description, lowercase, extract \artifact{[a-z]+} tokens, cap at 128 words; filter exact normalized overlaps and label conflicts. \\
+Shared preprocessing & Concatenate title and description, lowercase, extract \artifact{[a-z]+} tokens, and cap at 128 words. Filter exact normalized overlaps and label conflicts. \\
 Training arms & \textbf{Clean:} 20,000 uncorrupted articles (5,000 per topic). \textbf{Augmented:} 50\% per topic (10,000 total) replaced in place at $p = 10\%$ swaps (static per seed). \\
-Word TF-IDF LR & Unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, $L_2$ row norm; multinomial $L_2$ logistic regression via L-BFGS ($\le 1{,}000$ iter.), $C \in \{0.5, 2.0, 8.0\}$ tuned on $J(f)$ ($C = 2.0$ clean, $C = 8.0$ augmented). \\
-Word CNN & 30,000-row vocabulary (29,998 words, pad ID 0, \texttt{<unk>} ID 1), 96-dim $\mathcal{N}(0,1)$ embeddings; parallel 1D convolutions (64 filters each, $k \in \{3, 4, 5\}$, $\operatorname{ReLU}$), masked global max pooling (192 features), dropout $0.5$, linear head ($192 \to 4$); cross-entropy, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch 128, gradient clipping at 5.0, $\le 8$ epochs (patience 2 on $J(f)$). \\
-Scheduled Word CNN & Identical Word CNN architecture (2,954,692 scalars); $\le 16$ epochs, patience 4, \texttt{ReduceLROnPlateau} halving LR after 2 stalled epochs on $J(f)$. \\
-Subword CNN & Scheduled Word CNN schedule plus $8{,}193 \times 96$ fragment table ($+786{,}528$ scalars; 3,741,220 total); \texttt{<} and \texttt{>} boundary markers, 3--5 character n-grams, $\le 16$ evenly spaced fragments hashed into $1 \dots 8{,}192$, mean added to word embedding before convolution. \\
+Word TF-IDF LR & Unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, and $L_2$ row norm. Multinomial $L_2$ logistic regression via L-BFGS ($\le 1{,}000$ iter.), $C \in \{0.5, 2.0, 8.0\}$ tuned on $J(f)$ ($C = 2.0$ clean, $C = 8.0$ augmented). \\
+Word CNN & 30,000-row vocabulary (29,998 words, pad ID 0, \texttt{<unk>} ID 1), 96-dim $\mathcal{N}(0,1)$ embeddings, parallel 1D convolutions (64 filters each, $k \in \{3, 4, 5\}$, $\operatorname{ReLU}$), masked global max pooling (192 features), dropout $0.5$, and linear head ($192 \to 4$). Cross-entropy, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch 128, gradient clipping at 5.0, $\le 8$ epochs (patience 2 on $J(f)$). \\
+Scheduled Word CNN & Identical Word CNN architecture (2,954,692 scalars), trained for $\le 16$ epochs with patience 4 and \texttt{ReduceLROnPlateau} halving LR after 2 stalled epochs on $J(f)$. \\
+Subword CNN & Scheduled Word CNN schedule plus $8{,}193 \times 96$ fragment table ($+786{,}528$ scalars, 3,741,220 total). Uses \texttt{<} and \texttt{>} boundary markers, 3 to 5 character n-grams, and $\le 16$ evenly spaced fragments hashed into $1 \dots 8{,}192$, adding their mean to each word embedding before convolution. \\
 \bottomrule
 \end{tabularx}
 \caption[Model and training settings]{Summary of preprocessing, feature extraction, architecture, and optimization settings.}
