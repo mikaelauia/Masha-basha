@@ -71,7 +71,7 @@ All three primary pipelines accept the same normalized article strings and outpu
 
 \begin{figure}[!htbp]\centering
 \includegraphics[width=.92\linewidth]{figures/core_prediction_flow.pdf}
-\caption[Model prediction pipelines]{Processing pipelines from normalized text to four topic scores. Subword CNN enriches token representations with hashed character-fragment vectors before applying the same convolutional, pooling, and linear stages as Word CNN.}\label{fig:model-flow}
+\caption[Model prediction pipelines]{Processing pipelines from normalized text to four topic scores. \textit{Subword CNN} enriches token representations with hashed character-fragment vectors before applying the same convolutional, pooling, and linear stages as \textit{Word CNN}.}\label{fig:model-flow}
 \end{figure}
 
 \subsection{TF-IDF baseline}
@@ -80,7 +80,7 @@ Splitting normalized strings on single spaces guarantees exact token parity with
 The resulting 20,000 $\times$ 50,000 training matrix is stored in compressed sparse row format, and validation and test splits are transformed using the frozen training vocabulary and document frequencies so unseen swapped n-grams drop out. Multinomial logistic regression fits four 50,000-dimensional weight vectors and four scalar intercepts (200,004 parameters in total) via L-BFGS for up to 1,000 iterations with an $L_2$ penalty controlled by inverse regularization strength $C$. Evaluating $C \in \{0.5, 2.0, 8.0\}$ on the validation objective $J(f)$ selects $C = 2.0$ under clean training and $C = 8.0$ across all three augmented training seeds.
 
 \subsection{Word CNN}
-Word CNN builds its lookup table from the active training arm by ranking tokens in descending frequency (breaking ties alphabetically). It assigns indices $2, \dots, 29{,}999$ to the top 29,998 words, index 0 to right-padding, and index 1 to the shared unknown token (\texttt{<unk>}), giving a 30,000-row vocabulary. Validation and test tokens outside those 29,998 words map to index 1, though recurring misspellings can enter the vocabulary under augmentation. In the original 20\% test draw, 60.9\% of swapped tokens appeared in the vocabulary fitted on augmented text with seed 42.
+\textit{Word CNN} builds its lookup table from the active training arm by ranking tokens in descending frequency (breaking ties alphabetically). It assigns indices $2, \dots, 29{,}999$ to the top 29,998 words, index 0 to right-padding, and index 1 to the shared unknown token (\texttt{<unk>}), giving a 30,000-row vocabulary. Validation and test tokens outside those 29,998 words map to index 1, though recurring misspellings can enter the vocabulary under augmentation. In the original 20\% test draw, 60.9\% of swapped tokens appeared in the vocabulary fitted on augmented text with seed 42.
 
 For a batch of $B$ articles, the encoder outputs a right-padded $B \times 128$ integer matrix along with true unpadded word counts $\ell \in \{1, \dots, 128\}$. Looking up rows in the 30,000 $\times$ 96 embedding table produces a $B \times 128 \times 96$ tensor. Trainable rows (including \texttt{<unk>}) are initialized from $\mathcal{N}(0, 1)$, and padding row 0 is initialized to zero and kept frozen.
 
@@ -88,11 +88,11 @@ Transposing the tensor to $B \times 96 \times 128$ feeds three parallel stride-1
 
 \begin{figure}[!htbp]\centering
 \includegraphics[width=.92\linewidth]{figures/word_cnn_forward.pdf}
-\caption[CNN forward pass]{Tensor dimensions during the forward pass for a single article in Word CNN and Subword CNN. Subword CNN adds the mean of hashed character-fragment vectors to each word embedding prior to identical convolution, masked max pooling, dropout, and linear classification stages.}\label{fig:word-cnn-forward}
+\caption[CNN forward pass]{Tensor dimensions during the forward pass for a single article in \textit{Word CNN} and \textit{Subword CNN}. \textit{Subword CNN} adds the mean of hashed character-fragment vectors to each word embedding prior to identical convolution, masked max pooling, dropout, and linear classification stages.}\label{fig:word-cnn-forward}
 \end{figure}
 
 \subsection{Subword CNN}
-Subword CNN retains Word CNN's 30,000-entry vocabulary rule, filter widths ($k \in \{3, 4, 5\}$, 64 channels each), masked max pooling, $0.5$ dropout rate, and linear head, while also keeping the raw surface string at each token position so distinct misspellings that both fall back to \texttt{<unk>} (index 1) retain distinct character n-grams.
+\textit{Subword CNN} retains \textit{Word CNN}'s 30,000-entry vocabulary rule, filter widths ($k \in \{3, 4, 5\}$, 64 channels each), masked max pooling, $0.5$ dropout rate, and linear head, while also keeping the raw surface string at each token position so distinct misspellings that both fall back to \texttt{<unk>} (index 1) retain distinct character n-grams.
 
 For each word $w$, the fragment extractor adds start and end markers (\texttt{<} and \texttt{>}) and enumerates all contiguous character n-grams of lengths 3, 4, and 5 from left to right. Words generating more than 16 fragments deterministically subsample 16 evenly spaced indices across the list so prefix, interior, and suffix regions all remain represented. Each selected fragment $g$ is mapped by a deterministic hash $h(g)$ into one of 8,192 bucket indices ($1, \dots, 8{,}192$, with index 0 reserved as a frozen zero-padding row for words with fewer than 16 fragments). Hashing bounds the subword table to $8{,}193 \times 96 = 786{,}528$ scalars without a precomputed character dictionary and ensures that surviving fragments of test-time typos map to their trained buckets.
 
@@ -102,13 +102,13 @@ e(w) = e_{\mathrm{word}}(w) + \frac{1}{|G(w)|}\sum_{g \in G(w)} e_{\mathrm{char}
 \end{equation}
 Repeated fragments contribute proportionally, padding rows (index 0) are excluded from $|G(w)|$, and empty lists contribute zero. For efficiency, the data loader caches the 16 bucket indices once per unique word string in a split, while each forward pass executes live embedding lookups and averaging so gradients flow into both $e_{\mathrm{word}}$ and $e_{\mathrm{char}}$.
 
-Table~\ref{tab:cnn-parameter-breakdown} compares parameter counts: each width-$k$ convolutional layer holds $64 \times (96k + 1)$ parameters (73,920 across $k \in \{3, 4, 5\}$) and the linear head holds $4 \times (192 + 1) = 772$ parameters. Adding the 8,193-row fragment table increases stored parameters by 26.6\%, from 2,954,692 scalars in Word CNN (and Scheduled Word CNN) to 3,741,220 scalars in Subword CNN.
+Table~\ref{tab:cnn-parameter-breakdown} compares parameter counts: each width-$k$ convolutional layer holds $64 \times (96k + 1)$ parameters (73,920 across $k \in \{3, 4, 5\}$) and the linear head holds $4 \times (192 + 1) = 772$ parameters. Adding the 8,193-row fragment table increases stored parameters by 26.6\%, from 2,954,692 scalars in \textit{Word CNN} to 3,741,220 scalars in \textit{Subword CNN}.
 
 \begin{table}[htbp]
 \centering\small
 \begin{tabular}{@{}lrr@{}}
 \toprule
-Architecture component & Word CNN & Subword CNN \\
+Architecture component & \textit{Word CNN} & \textit{Subword CNN} \\
 \midrule
 Word embedding table ($30{,}000 \times 96$) & 2,880,000 & 2,880,000 \\
 Convolutional filters and biases ($k \in \{3, 4, 5\}$, 64 each) & 73,920 & 73,920 \\
@@ -118,12 +118,12 @@ Character fragment embedding table ($8{,}193 \times 96$) & 0 & 786,528 \\
 Total stored parameters & 2,954,692 & 3,741,220 \\
 \bottomrule
 \end{tabular}
-\caption[CNN parameter breakdown]{Parameter breakdown for the convolutional architectures, including frozen zero-padding rows. Scheduled Word CNN matches Word CNN.}
+\caption[CNN parameter breakdown]{Parameter breakdown for the convolutional architectures, including frozen zero-padding rows.}
 \label{tab:cnn-parameter-breakdown}
 \end{table}
 
 \subsection{Prediction trace}
-Table~\ref{tab:article-trace} walks through official test article 0 (\emph{Fears for T N pension after talks}, a Business story on union pension talks) across the clean-trained seed-42 pipelines. Joining the title and description bridges \texttt{talks unions} and normalization strips quotation marks around \texttt{disappointed}, leaving 25 words. For Word TF-IDF LR, sparsity comes from vocabulary intersection ($\mathrm{min\_df} = 2$), while for the CNNs $\ell = 25$ limits max pooling to unpadded windows.
+Table~\ref{tab:article-trace} walks through official test article 0 (\emph{Fears for T N pension after talks}, a Business story on union pension talks) across the clean-trained seed-42 pipelines. Joining the title and description bridges \texttt{talks unions} and normalization strips quotation marks around \texttt{disappointed}, leaving 25 words. For \textit{Word TF-IDF LR}, sparsity comes from vocabulary intersection ($\mathrm{min\_df} = 2$), while for the CNNs $\ell = 25$ limits max pooling to unpadded windows.
 
 \begin{table}[!htbp]
 \centering\small
@@ -131,11 +131,11 @@ Table~\ref{tab:article-trace} walks through official test article 0 (\emph{Fears
 \toprule
 Pipeline stage & Representation and scoring on official test article 0 (25 words, $\ell = 25$) \\
 \midrule
-Word TF-IDF LR & Activates 29 of 50,000 fitted unigrams and bigrams. Multiplying the $L_2$-normalized vector by the $4 \times 50{,}000$ weights plus intercepts gives four class logits. \\
+\textit{Word TF-IDF LR} & Activates 29 of 50,000 fitted unigrams and bigrams. Multiplying the $L_2$-normalized vector by the $4 \times 50{,}000$ weights plus intercepts gives four class logits. \\
 \addlinespace
-Word CNN & Maps 25 word IDs plus 103 zero pads to $128 \times 96$ embeddings. Width-3, 4, and 5 filters max-pool over 23, 22, and 21 valid windows to form 192 features. \\
+\textit{Word CNN} & Maps 25 word IDs plus 103 zero pads to $128 \times 96$ embeddings. Width-3, 4, and 5 filters max-pool over 23, 22, and 21 valid windows to form 192 features. \\
 \addlinespace
-Subword CNN & Adds a bucket mean of up to 16 fragments per active word (for example, \texttt{pension} yields 16 fragments of lengths 3 to 5) before pooling over the same 23, 22, and 21 valid windows. \\
+\textit{Subword CNN} & Adds a bucket mean of up to 16 fragments per active word (for example, \texttt{pension} yields 16 fragments of lengths 3 to 5) before pooling over the same 23, 22, and 21 valid windows. \\
 \addlinespace
 Final prediction & All three clean-trained (seed 42) models assign the highest logit to Business (class 2), matching the true label and saved test logs. \\
 \bottomrule
@@ -154,7 +154,7 @@ which keeps falling whenever true-class logit margins widen beyond a correct arg
 \paragraph{Checkpoints and schedules.}
 Each epoch sweeps all 20,000 training articles shuffled by the fitting seed (42, 43, or 44, which also sets initial weights) and logs batch-size-weighted mean training loss. Switching to evaluation mode with dropout turned off, the model scores both the clean ($0\%$ swaps) and corrupted ($10\%$ swaps) validation sets. A candidate epoch replaces the saved best checkpoint only if unweighted mean Macro-F1 improves by more than $10^{-6}$ on $[0, 1]$.
 
-Under its baseline schedule, \textbf{Word CNN} trains for up to 8 epochs with early-stopping patience of 2 epochs and a constant learning rate of $10^{-3}$. \textbf{Subword CNN} and the control \textbf{Scheduled Word CNN} train for up to 16 epochs with patience of 4 epochs and a \texttt{ReduceLROnPlateau} scheduler that halves the learning rate after 2 unimproved epochs. Once training ends, we save the best-epoch weights, hyperparameter settings, selected epoch index, and 30,000-entry vocabulary to disk.
+Under its baseline schedule, \textit{Word CNN} trains for up to 8 epochs with early-stopping patience of 2 epochs and a constant learning rate of $10^{-3}$. \textit{Subword CNN} trains for up to 16 epochs with patience of 4 epochs and a \texttt{ReduceLROnPlateau} scheduler that halves the learning rate after 2 unimproved epochs. Once training ends, we save the best-epoch weights, hyperparameter settings, selected epoch index, and 30,000-entry vocabulary to disk.
 
 \paragraph{Artifact verification.}
-A dedicated verification utility reconstructs each predictor directly from its serialized artifacts, loading the paired vectorizer and linear classifier for Word TF-IDF LR and rebuilding the weights, vocabulary lookup, and fragment hash for Word CNN and Subword CNN. Replay checks confirm aligned article IDs and labels and exact reproduction of all saved article-level predictions (Appendix~\ref{app:repro}).
+A dedicated verification utility reconstructs each predictor directly from its serialized artifacts, loading the paired vectorizer and linear classifier for \textit{Word TF-IDF LR} and rebuilding the weights, vocabulary lookup, and fragment hash for \textit{Word CNN} and \textit{Subword CNN}. Replay checks confirm aligned article IDs and labels and exact reproduction of all saved article-level predictions (Appendix~\ref{app:repro}).

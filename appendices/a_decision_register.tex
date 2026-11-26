@@ -1,6 +1,6 @@
 \chapter{Additional details}\label{app:decisions}\label{app:fullresults}
 
-In the final three-seed comparison, Subword CNN reuses its seed-42 validation-screen checkpoint alongside fits at seeds 43 and 44 under the same selection rule, and \textbf{Scheduled Word CNN} uses its frozen seed-42 validation-screen checkpoints.
+In the final three-seed comparison, \textit{Subword CNN} reuses its seed-42 validation-screen checkpoint alongside fits at seeds 43 and 44 under the same selection rule, and the seed-42 schedule control (\textit{Scheduled Word CNN}) uses its frozen validation-screen checkpoints.
 
 \section{Model settings}
 Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and optimization settings across the shared 20,000-article training and 4,000-article validation splits.
@@ -13,10 +13,10 @@ Pipeline component & Configuration details \\
 \midrule
 Shared preprocessing & Concatenate title and description, lowercase, extract \artifact{[a-z]+} tokens, and cap at 128 words. Filter exact normalized overlaps and label conflicts. \\
 Training arms & \textbf{Clean:} 20,000 uncorrupted articles (5,000 per topic). \textbf{Augmented:} 50\% per topic (10,000 total) replaced in place at $p = 10\%$ swaps (static per seed). \\
-Word TF-IDF LR & Unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, and $L_2$ row norm. Multinomial $L_2$ logistic regression via L-BFGS ($\le 1{,}000$ iter.), $C \in \{0.5, 2.0, 8.0\}$ tuned on $J(f)$ ($C = 2.0$ clean, $C = 8.0$ augmented). \\
-Word CNN & 30,000-row vocabulary (29,998 words, pad ID 0, \texttt{<unk>} ID 1), 96-dim $\mathcal{N}(0,1)$ embeddings, parallel 1D convolutions (64 filters each, $k \in \{3, 4, 5\}$, $\operatorname{ReLU}$), masked global max pooling (192 features), dropout $0.5$, and linear head ($192 \to 4$). Cross-entropy, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch 128, gradient clipping at 5.0, $\le 8$ epochs (patience 2 on $J(f)$). \\
-Scheduled Word CNN & Identical Word CNN architecture (2,954,692 scalars), trained for $\le 16$ epochs with patience 4 and \texttt{ReduceLROnPlateau} halving LR after 2 stalled epochs on $J(f)$. \\
-Subword CNN & Scheduled Word CNN schedule plus $8{,}193 \times 96$ fragment table ($+786{,}528$ scalars, 3,741,220 total). Uses \texttt{<} and \texttt{>} boundary markers, 3 to 5 character n-grams, and $\le 16$ evenly spaced fragments hashed into $1 \dots 8{,}192$, adding their mean to each word embedding before convolution. \\
+\textit{Word TF-IDF LR} & Unigrams and bigrams ($n \in \{1, 2\}$), $\mathrm{min\_df} = 2$, $\mathrm{max\_features} = 50{,}000$, sublinear TF $(1 + \log f_{td})$, smoothed IDF, and $L_2$ row norm. Multinomial $L_2$ logistic regression via L-BFGS ($\le 1{,}000$ iter.), $C \in \{0.5, 2.0, 8.0\}$ tuned on $J(f)$ ($C = 2.0$ clean, $C = 8.0$ augmented). \\
+\textit{Word CNN} & 30,000-row vocabulary (29,998 words, pad ID 0, \texttt{<unk>} ID 1), 96-dim $\mathcal{N}(0,1)$ embeddings, parallel 1D convolutions (64 filters each, $k \in \{3, 4, 5\}$, $\operatorname{ReLU}$), masked global max pooling (192 features), dropout $0.5$, and linear head ($192 \to 4$). Cross-entropy, AdamW ($\mathrm{lr} = 10^{-3}$, weight decay $10^{-4}$), batch 128, gradient clipping at 5.0, $\le 8$ epochs (patience 2 on $J(f)$). \\
+\textit{Scheduled Word CNN} & Seed-42 schedule control using \textit{Word CNN}'s architecture (2,954,692 scalars), trained for $\le 16$ epochs with patience 4 and \texttt{ReduceLROnPlateau} halving LR after 2 stalled epochs on $J(f)$. \\
+\textit{Subword CNN} & Same 16-epoch schedule plus $8{,}193 \times 96$ fragment table ($+786{,}528$ scalars, 3,741,220 total). Uses \texttt{<} and \texttt{>} boundary markers, 3 to 5 character n-grams, and $\le 16$ evenly spaced fragments hashed into $1 \dots 8{,}192$, adding their mean to each word embedding before convolution. \\
 \bottomrule
 \end{tabularx}
 \caption[Model and training settings]{Summary of preprocessing, feature extraction, architecture, and optimization settings.}
@@ -25,9 +25,10 @@ Subword CNN & Scheduled Word CNN schedule plus $8{,}193 \times 96$ fragment tabl
 \FloatBarrier
 
 \section{Seed-level results}
-Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003, alongside the full $0\%, 5\%, 10\%$, and $20\%$ sweep for seed-42 \textbf{Scheduled Word CNN}.
+Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:scheduled-review} summarizes the seed-42 schedule control at 0\% and 20\% swaps, and Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003 alongside the full $0\%, 5\%, 10\%$, and $20\%$ sweep for seed-42 \textit{Scheduled Word CNN}.
 
 \input{tables/core_fit_variation}
+\input{tables/scheduled-review}
 
 \begin{table}[!htbp]
 \centering\small
@@ -37,24 +38,24 @@ Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
 Model & Seed & Clean & Aug. & Clean & Aug. & Clean & Aug. \\
 \midrule
-Word TF-IDF LR & 42 & 89.14 & 89.22 & 88.92 & 89.20 & 89.04 & 89.03 \\
+\textit{Word TF-IDF LR} & 42 & 89.14 & 89.22 & 88.92 & 89.20 & 89.04 & 89.03 \\
  & 43 & 89.14 & 89.22 & 88.92 & 88.93 & 89.04 & 89.21 \\
  & 44 & 89.14 & 89.33 & 88.92 & 89.07 & 89.04 & 89.12 \\
 \addlinespace
-Word CNN & 42 & 84.39 & 84.75 & 84.32 & 84.72 & 84.45 & 84.88 \\
+\textit{Word CNN} & 42 & 84.39 & 84.75 & 84.32 & 84.72 & 84.45 & 84.88 \\
  & 43 & 84.11 & 84.34 & 84.14 & 84.63 & 84.54 & 84.55 \\
  & 44 & 84.95 & 84.33 & 84.79 & 84.25 & 85.28 & 84.72 \\
 \addlinespace
-Subword CNN & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
+\textit{Subword CNN} & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
  & 43 & 85.99 & 86.34 & 85.39 & 85.76 & 85.95 & 85.95 \\
  & 44 & 85.47 & 85.41 & 85.50 & 85.17 & 85.51 & 85.49 \\
 \midrule
-\multicolumn{8}{@{}l}{\textit{Scheduled Word CNN with seed 42 across official test swap targets (Acc.\ / Macro-F1, \%):}} \\
+\multicolumn{8}{@{}l}{\textit{Scheduled Word CNN} with seed 42 across official test swap targets (Acc.\ / Macro-F1, \%):} \\
 \multicolumn{8}{@{}l}{Clean arm, 0\%: 87.22 / 87.21, \quad 5\%: 86.43 / 86.41, \quad 10\%: 86.21 / 86.18, \quad 20\%: 84.64 / 84.58} \\
 \multicolumn{8}{@{}l}{Aug.\ arm, 0\%: 87.17 / 87.18, \quad 5\%: 86.59 / 86.60, \quad 10\%: 86.14 / 86.15, \quad 20\%: 85.50 / 85.51} \\
 \bottomrule
 \end{tabular}
-\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003, plus the full swap sweep for seed-42 Scheduled Word CNN.}
+\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003, plus the full swap sweep for seed-42 \textit{Scheduled Word CNN}.}
 \label{tab:app-seed-draws}
 \end{table}
 \FloatBarrier
