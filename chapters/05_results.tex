@@ -5,7 +5,7 @@ All three selected models were tested on the 7,600 official test articles (1,900
 Under clean training, test accuracy drops steadily for every model as the swap target rises from 0\% to 20\%, though the size of the drop differs sharply across models (Figure~\ref{fig:core-robustness} and Table~\ref{tab:corefull}). The linear baseline (\textit{Word TF-IDF LR}) starts highest at $90.05\%$ and loses only $0.91$ percentage points across the sweep ($89.14\%$ at 20\% swaps), finishing more than $3.8$ percentage points ahead of both CNNs. \textit{Word CNN} takes the steepest hit, falling by $2.31$ percentage points from $86.79\%$ to $84.48\%$, while adding character fragments in \textit{Subword CNN} trims that drop to $1.86$ percentage points ($87.18\%$ to $85.32\%$). Across all three seeds on the original 20\% draw under augmented training, \textit{Subword CNN} beats \textit{Word CNN} by $+1.30$ percentage points ($85.77\%$ vs.\ $84.47\%$, 95\% bootstrap interval $[+0.95, +1.64]$, with the role of training schedule length examined in Section~\ref{sec:limitations} and Appendix~\ref{app:decisions}).
 
 \begin{figure}[!htbp]\centering
-\includegraphics[width=.94\linewidth]{figures/core_robustness.pdf}
+\includegraphics[width=.84\linewidth]{figures/core_robustness.pdf}
 \caption[Accuracy across swap targets]{Official test accuracy (\%) across swap targets under clean training. CNN error bars indicate $\pm 1$ sample standard deviation across seeds 42, 43, and 44 (at 20\% swaps, $s = 0.43$ percentage points for \textit{Word CNN} and $s = 0.76$ for \textit{Subword CNN}).}\label{fig:core-robustness}
 \end{figure}
 
@@ -20,6 +20,7 @@ Model & Training arm & 0\% swaps & 5\% swaps & 10\% swaps & 20\% swaps \\\midrul
  & Augmented & 87.32 / 87.29 & 87.02 / 86.99 & 86.72 / 86.69 & 85.77 / 85.73 \\\bottomrule
 \end{tabular}
 \caption[Official test results]{Official test accuracy / Macro-F1 (\%) across swap targets and training arms. Non-deterministic rows average seeds 42, 43, and 44, and seed standard deviations appear in Appendix~\ref{app:decisions}.}\label{tab:corefull}\end{table}
+\FloatBarrier
 
 \section{Swap augmentation}
 Next, we check whether static swap augmentation helps models handle spelling noise without hurting clean accuracy. At the original 20\% swap target (seed 41001), augmentation helps \textit{Subword CNN} the most, raising its mean accuracy by $+0.46$ percentage points ($85.32\%$ to $85.77\%$, 95\% paired bootstrap interval $[+0.03, +0.90]$, Figure~\ref{fig:augmentation-review}). Still, results vary widely across fitting seeds. Seed 42 gained $+1.08$ percentage points and seed 43 gained $+0.36$, while seed 44 fell slightly by $-0.07$.
@@ -53,10 +54,12 @@ The same seed pattern inside \textit{Subword CNN} shows up across all three draw
 
 Even when aggregate scores look stable across swap draws, individual article predictions still shift from draw to draw. Across the three 20\% draws, fixed clean-trained checkpoints flipped correctness on $6.1\%$ of the 7,600 test articles for \textit{Word TF-IDF LR}, compared with $11.8\%$ for \textit{Word CNN} and $11.3\%$ for \textit{Subword CNN} (averaged across their three fits). Official test article 0, the Business pension story traced in Table~\ref{tab:article-trace}, illustrates this clearly when clean-trained \textit{Subword CNN} (seed 42) misclassified it as World on the first two 20\% draws and predicted Business on the third, while the linear baseline predicted Business on all three.
 
+\FloatBarrier
 \section{Confirmation check}
 To verify that these findings hold outside the official test set used during early checks, we evaluated the frozen seed-42 checkpoints on the untouched 4,000-article confirmation split at 0\% and 10\% swaps (Table~\ref{tab:held-out-review}). The exact same ranking holds in every column, with \textit{Word TF-IDF LR} ahead of \textit{Subword CNN} and \textit{Word CNN}, and augmented \textit{Subword CNN} beating \textit{Word CNN} by $+1.30$ percentage points at 10\% swaps ($86.75\%$ vs.\ $85.45\%$). Inside \textit{Subword CNN}, augmentation raises 10\%-swap accuracy by $+0.60$ percentage points ($86.15\%$ to $86.75\%$) while lowering clean accuracy by $0.45$ points before rounding ($88.12\%$ to $87.68\%$), showing a small clean-text tradeoff on unseen articles.
 
 \input{tables/held-out-review}
+\FloatBarrier
 
 \section{Error analysis}\label{sec:error-analysis}
 Finally, we look beneath overall accuracy to see which topics suffer most from spelling swaps and how often individual articles flip between right and wrong predictions.
@@ -108,10 +111,11 @@ On the 10\%-swap validation view, out-of-vocabulary token rates in \textit{Word 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=.82\linewidth]{figures/paired_prediction_changes.pdf}
+\includegraphics[width=.74\linewidth]{figures/paired_prediction_changes.pdf}
 \caption[Paired prediction flips]{Paired prediction changes across the 7,600 official test articles for clean-trained seed-42 models relative to 0\% swaps (brown indicates new errors and green indicates corrected errors).}
 \label{fig:paired-changes}
 \end{figure}
+\FloatBarrier
 
 At 20\% swaps, \textit{Word TF-IDF LR} makes 142 new errors (clean correct $\to$ swap wrong) while fixing 73 prior clean-text mistakes (clean wrong $\to$ swap correct). That net loss of $142 - 73 = 69$ articles ($-0.91$ percentage points) hides $142 + 73 = 215$ flipped predictions. Both CNNs show more than twice as much churn: \textit{Word CNN} (seed 42) makes 341 new errors and 151 fixes (net $-190$ articles, 492 flips), and \textit{Subword CNN} (seed 42) makes 339 new errors and 138 fixes (net $-201$ articles, 477 flips).
 

@@ -25,7 +25,7 @@ Training arms & Clean training uses 20,000 uncorrupted articles (5,000 per topic
 \FloatBarrier
 
 \section{Seed-level results}
-Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:scheduled-review} summarizes the seed-42 schedule control at 0\% and 20\% swaps, and Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003 alongside the full $0\%, 5\%, 10\%$, and $20\%$ sweep for seed-42 \textit{Scheduled Word CNN}.
+Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:scheduled-review} summarizes the seed-42 schedule control across all four official test swap targets, and Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003.
 
 \input{tables/core_fit_variation}
 \input{tables/scheduled-review}
@@ -49,13 +49,9 @@ Model & Seed & Clean & Aug. & Clean & Aug. & Clean & Aug. \\
 \textit{Subword CNN} & 42 & 84.49 & 85.57 & 84.20 & 85.34 & 84.63 & 85.59 \\
  & 43 & 85.99 & 86.34 & 85.39 & 85.76 & 85.95 & 85.95 \\
  & 44 & 85.47 & 85.41 & 85.50 & 85.17 & 85.51 & 85.49 \\
-\midrule
-\multicolumn{8}{@{}l}{\textit{Scheduled Word CNN} (seed 42) across official test swap targets (Acc.\ / Macro-F1, \%)} \\
-\multicolumn{8}{@{}l}{Clean training scores 87.22 / 87.21 at 0\%, 86.43 / 86.41 at 5\%, 86.21 / 86.18 at 10\%, and 84.64 / 84.58 at 20\%.} \\
-\multicolumn{8}{@{}l}{Augmented training scores 87.17 / 87.18 at 0\%, 86.59 / 86.60 at 5\%, 86.14 / 86.15 at 10\%, and 85.50 / 85.51 at 20\%.} \\
 \bottomrule
 \end{tabular}
-\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003, plus the full swap sweep for seed-42 \textit{Scheduled Word CNN}.}
+\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003.}
 \label{tab:app-seed-draws}
 \end{table}
 \FloatBarrier

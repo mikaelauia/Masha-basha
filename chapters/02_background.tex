@@ -35,6 +35,7 @@ Official test article 47, a Sci/Tech story on Dell's exit from China's budget co
 \label{tab:observed-swap}
 \end{table}
 
+\Needspace{10\baselineskip}
 \section{Measuring robustness}
 Character edits are a known weak spot for NLP models. \citet{belinkov2018} showed that natural typos and synthetic letter swaps sharply degrade neural machine translation, and \citet{pruthi2019} found that adversarial character edits cut text classification accuracy without a dedicated word-recognition front end. Instead of adding a separate spell-checker, we test intrinsic robustness coming from the model's representation (sparse n-grams, word vectors, or subword fragments) and from training on corrupted examples. Unlike \citet{wei2019}, who generated extra training rows via word-level synonym swaps, insertions, and deletions, our static augmentation edits interior letters in place across half of the clean training articles, keeping total sample count and class balance fixed.
 

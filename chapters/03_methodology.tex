@@ -3,9 +3,9 @@
 \section{Data and splits}
 Our experiments use a complete CSV mirror of the AG News titles and descriptions \citep{agmirror,zhang2015} matching the standard \texttt{torchtext} benchmark splits of 120,000 training and 7,600 test articles \citep{torchtext}. Figure~\ref{fig:data-partitions} summarizes how the raw corpus is filtered and partitioned into disjoint subsets for training, validation selection, separate confirmation, and final testing.
 
-\begin{figure}[!b]
+\begin{figure}[!htbp]
 \centering
-\includegraphics[width=.94\linewidth]{figures/data_partitions.pdf}
+\includegraphics[width=.88\linewidth]{figures/data_partitions.pdf}
 \caption[Data filtering and partitions]{Filtering and stratified partitioning of the AG News dataset. Training articles whose normalized text matches an official test article are removed before drawing the disjoint training, validation, and separate confirmation partitions.}
 \label{fig:data-partitions}
 \end{figure}
@@ -22,7 +22,7 @@ Capping texts at 128 words sets a fixed padded width for the CNNs while making s
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=.92\linewidth]{figures/normalization_cues.pdf}
+\includegraphics[width=.86\linewidth]{figures/normalization_cues.pdf}
 \caption[Removed surface cues]{Percentage of the 20,000 selected training articles (5,000 per topic) containing numeric digits or currency symbols prior to alphabetic normalization.}
 \label{fig:normalization-cues}
 \end{figure}
@@ -48,7 +48,7 @@ Each evaluation setting uses a defined set of swap targets. Validation selection
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=.92\linewidth]{figures/swap_exposure.pdf}
+\includegraphics[width=.86\linewidth]{figures/swap_exposure.pdf}
 \caption[Realized swap exposure]{Realized corruption exposure across the 7,600 official test articles as a function of the swap target for eligible words $p$. The left panel shows the percentage of all test tokens modified, and the right panel shows the percentage of test articles containing at least one modified word.}
 \label{fig:swap-exposure}
 \end{figure}
@@ -64,6 +64,7 @@ All three primary pipelines accept the same normalized article strings and outpu
 \includegraphics[width=.92\linewidth]{figures/core_prediction_flow.pdf}
 \caption[Model prediction pipelines]{Processing pipelines from normalized text to four topic scores. \textit{Subword CNN} enriches token representations with hashed character-fragment vectors before applying the same convolutional, pooling, and linear stages as \textit{Word CNN}.}\label{fig:model-flow}
 \end{figure}
+\FloatBarrier
 
 \subsection{TF-IDF baseline}
 Splitting normalized strings on single spaces guarantees exact token parity with the neural models. Fitted only on the active training arm, \texttt{TfidfVectorizer} extracts word unigrams and adjacent word bigrams with $\mathrm{min\_df} = 2$, dropping terms that appear only once (including isolated training typos in the augmented arm). It caps the vocabulary at the top 50,000 terms by corpus frequency and applies the sublinear TF-IDF weighting and $L_2$ row normalization defined in Chapter~\ref{ch:background}.
@@ -134,6 +135,7 @@ Final prediction & All three clean-trained (seed 42) models assign the highest l
 \caption[Single-article prediction trace]{Trace of official test article 0 (25 normalized words, true class Business) through the models trained on clean text with seed 42.}
 \label{tab:article-trace}
 \end{table}
+\FloatBarrier
 
 \section{Neural training}
 Both neural architectures train with mini-batches of $B = 128$ articles (with a smaller final batch when needed). Given raw logits $z_{i,1}, \dots, z_{i,4}$ for each article $i$, every step minimizes batch mean cross-entropy:
