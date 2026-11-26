@@ -1,30 +1,17 @@
 \chapter{Introduction}\label{ch:introduction}
-Automated news systems need to route incoming stories reliably even when rushed editing, scanning glitches, or typing slips introduce small spelling errors. While a human reader can easily guess a slightly garbled word from its outer letters and surrounding context, an automated classifier can miss an important clue as soon as a single swapped letter changes a recognized word. How sharply spelling noise hurts performance depends on how a model reads words, combines clues across an article, and handles misspelled text during training.
+Automated news systems need to route incoming stories reliably even when typing slips or scanning glitches introduce spelling errors. While human readers easily guess a slightly garbled word from its outer letters and context, a classifier can lose a key signal as soon as one swapped letter alters a familiar word. How much spelling noise hurts depends on how a model reads words, weighs clues across an article, and handles noisy training text.
 
-\section{Task and data}
-We investigate these questions on four-topic news classification using the AG News dataset \citep{zhang2015,agmirror}. Each classifier reads a short article's combined headline and summary and sorts it into one of four balanced topics: \emph{World}, \emph{Sports}, \emph{Business}, or \emph{Sci/Tech}. To simulate natural keyboard slips cleanly, we randomly swap one adjacent pair of unequal interior letters inside eligible words (turning \texttt{consumer} into \texttt{cosnumer}, for instance). This preserves word boundaries, length, outer letters, and meaning, and applying the same deterministic edits across models ensures fair comparisons at every noise level.
+\section{Task and questions}
+We study these questions on four-topic classification using AG News \citep{zhang2015,agmirror}, sorting headlines and summaries into \emph{World}, \emph{Sports}, \emph{Business}, or \emph{Sci/Tech}. To simulate natural typos reproducibly without altering meaning or word length, we randomly swap one adjacent pair of unequal middle letters inside eligible words (turning \texttt{consumer} into \texttt{cosnumer}, detailed in Chapter~\ref{ch:background}).
 
-\section{Research questions}
-Before running our main evaluations, we defined two focused investigations around a shared 20,000-article training budget (5,000 stories per topic) and 4,000 validation articles. Keeping the labeled budget fixed puts accuracy, noise resilience, and training speed on equal footing while making multi-run neural experiments practical on standard CPU hardware.
+Our first research question asks how accuracy holds up as swaps rise from clean text to 5\%, 10\%, and 20\% of eligible words, and how word and subword neural networks compare against a sparse linear baseline. Our second question tests whether replacing half of a fixed 20,000-article training budget with 10\%-swapped copies improves noisy accuracy without hurting clean accuracy, keeping runtime and 4,000 validation stories directly comparable on CPU hardware.
 
-\subsection{Robustness across models}
-\emph{How does classification quality hold up as spelling swaps become more common, and how do word-level and subword-aware neural networks compare against a traditional linear word baseline?} We train each model on clean articles and test the fixed models on unmodified text (0\% swaps) as well as progressively noisier versions where 5\%, 10\%, and 20\% of eligible words receive an interior letter swap.
-
-\subsection{Training augmentation}
-\emph{Does replacing half of the clean training articles with misspelled versions improve accuracy under spelling noise without hurting clean-text performance?} Keeping the total training set fixed at 20,000 articles, we compare clean training against an augmented setup that replaces half of each topic's training stories with 10\%-swapped copies.
-
-\section{Approach and findings}
-Our main comparison centers on three models trained from scratch on the same 20,000 articles, representing three distinct ways a classifier can read noisy text:
+\section{Models and overview}
+We compare three classifiers trained from scratch on those 20,000 articles (selected from broader checks in Chapter~\ref{ch:experiments}):
 \begin{itemize}
-\item \textit{Word TF-IDF LR} treats each article as a weighted checklist of single words and two-word pairs, boosting distinctive topic words over common filler terms and adding them into one score per topic.
-\item \textit{Word CNN} turns known words into learned numeric vectors and slides 3-, 4-, and 5-word phrase detectors across the article (for up to 8 training passes), keeping each detector's strongest match.
-\item \textit{Subword CNN} enriches each word vector with overlapping 3-to-5-letter character chunks and trains for up to 16 passes with learning-rate decay, so unseen typos still share recognizable pieces with known words.
+\item \textit{Word TF-IDF LR} scores each story as a weighted checklist of single words and adjacent word pairs, emphasizing distinctive topic terms.
+\item \textit{Word CNN} maps known words to learned vectors (falling back to one shared placeholder on unknown typos) and slides short phrase detectors across consecutive words, keeping each detector's strongest match.
+\item \textit{Subword CNN} adds overlapping three-to-five-letter character pieces to each word vector so unseen misspellings retain partial clues.
 \end{itemize}
 
-To see what a model loses when a letter flips, consider an article mentioning \texttt{cosnumer} instead of \texttt{consumer}. A word-only neural network fails to recognize that token and replaces it with a generic unknown-word placeholder, while a linear checklist simply relies on all the untouched words left in the article and subword chunks still recognize intact pieces such as \texttt{co} and \texttt{mer}.
-
-We selected these three models after screening a wider set of linear, character-aware, and pretrained candidates on validation data (Chapter~\ref{ch:experiments}) to keep our main comparison focused on one transparent baseline and two neural architectures trained strictly on AG News. Because headline accuracy hides article-level behavior, we also pair clean and noisy predictions on every test item to count newly broken decisions alongside accidental fixes and track which topics absorb misrouted stories. We verify stability across two extra 20\%-swap draws and confirm our rankings on an untouched 4,000-article sample.
-
-Across all experiments, the simple linear baseline (\textit{Word TF-IDF LR}) delivers both the highest clean accuracy (90.05\%) and the strongest resistance to typos, losing less than one percentage point (0.91 points) at 20\% swaps while fitting in 13 seconds. Adding misspelled training examples gives \textit{Subword CNN} a small average gain under 20\% noise (0.31 to 0.46 points across typo draws), though longer training explains much of its edge over \textit{Word CNN}.
-
-The rest of this report proceeds as follows. Chapter~\ref{ch:background} introduces text representations, classifiers, and robustness metrics in accessible terms. Chapters~\ref{ch:method} and~\ref{ch:experiments} cover data preparation, typo generation, model details, and experimental design. Chapter~\ref{ch:results} presents the empirical findings and error analysis, followed by discussion in Chapter~\ref{ch:discussion} and conclusions in Chapter~\ref{ch:conclusion}.
+Across all checks, including extra typo draws, article-flip tracking, and 4,000 untouched articles, \textit{Word TF-IDF LR} wins on clean accuracy (roughly 90\%), noise resilience (under one point loss), and CPU speed (13 seconds), while noisy training gives the subword model only a slight average boost. Chapter~\ref{ch:background} explains the model mechanics, Chapters~\ref{ch:method} and~\ref{ch:experiments} cover data, math, and controls, Chapter~\ref{ch:results} reports results and errors, and Chapters~\ref{ch:discussion} and~\ref{ch:conclusion} discuss trade-offs.

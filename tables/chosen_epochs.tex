@@ -2,13 +2,13 @@
 \begin{tabular}{llrrrrr}\toprule
  & & \multicolumn{2}{c}{Epochs} & \multicolumn{3}{c}{Validation Macro-F1 (\%)} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-7}
-Model & Training arm & Saved & Run & Clean (0\%) & Swaps (10\%) & Mean $J(f)$ \\\midrule
+Model & Training arm & Saved & Run & Clean (0\%) & Swaps (10\%) & Combined score \\\midrule
 \textit{Word CNN} & Clean & 7 & 8 & 86.44 & 85.81 & 86.12 \\
  & Augmented & 7 & 8 & 86.92 & 86.29 & 86.60 \\
 \textit{Subword CNN} & Clean & 12 & 16 & 87.61 & 86.68 & 87.15 \\
  & Augmented & 11 & 15 & 87.76 & 86.75 & 87.25 \\
 \bottomrule
 \end{tabular}
-\caption[Selected CNN checkpoints]{Selected checkpoint epochs and validation Macro-F1 scores (\%) in the primary CNN development screen. The unweighted average $J(f)$ across clean (0\%) and corrupted (10\% swaps) validation sets decides which epoch is saved.}
+\caption[Selected CNN checkpoints]{Selected checkpoint epochs and validation Macro-F1 scores (\%) in the primary CNN development screen. The unweighted combined score across clean and 10\%-swapped validation sets decides which epoch is saved.}
 \label{tab:chosen-epochs}
 \end{table}

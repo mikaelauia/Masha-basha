@@ -1,28 +1,13 @@
 \chapter{Background}\label{ch:background}
 
-\section{Sparse linear models}
-Although every model in our study reads the exact same cleaned text, they turn words into numbers very differently. Our baseline treats each article as an unordered collection of word and phrase weights, while the neural models read an ordered sequence of learned word vectors. That structural difference shapes what happens when a single typo strikes.
+\section{Comparing text models}
+Although every model reads the exact same cleaned text, they turn articles into predictions in fundamentally different ways. The linear baseline collects document-wide counts of single words (unigrams) and adjacent word pairs (bigrams) across a large vocabulary checklist \citep{wang2012}. Because any short story uses only a tiny share of the full vocabulary, nearly all checklist entries sit at zero, and when a typo breaks one word and its neighboring pairs, dozens of surviving topical words continue pointing to the right label \citep{tfidf,logisticregression}. Weighting down common or repeated words and scaling each checklist to adjust for article length keeps predictions balanced across short and long items.
 
-In \textit{Word TF-IDF LR}, an article is represented as a long checklist covering up to 50,000 single words (unigrams) and adjacent two-word pairs (bigrams). Because one short story mentions only a tiny fraction of those terms, nearly all entries in its vector remain zero. Two-word pairs help capture short expressions, and when a typo alters one word, that word and its two adjacent pairs drop out while dozens of intact topic words still point to the right category \citep{wang2012}.
+Unlike an unordered checklist, \textit{Word CNN} preserves word order \citep{kim2014}. It replaces each recognized word with a learned numeric vector, while routing unfamiliar tokens (including most typos) to one shared fallback vector. Parallel filters slide across short windows of consecutive words to detect meaningful phrases anywhere in the headline or summary. Global max pooling then picks only each filter's single highest score across the article, which makes the network sharp at spotting key phrases yet sensitive whenever a spelling error hits the winning phrase itself.
 
-To keep repeated or everyday words from drowning out informative terms, each term $t$ appearing $f_{td} > 0$ times in document $d$ receives a TF-IDF weight:
-\begin{equation*}
-a_{td} = (1 + \log f_{td})\left(1 + \log\frac{1 + N}{1 + \mathrm{df}_t}\right),
-\end{equation*}
-where $N$ is the number of training articles and $\mathrm{df}_t$ counts how many contain term $t$ \citep{tfidf}. Taking logarithms dampens repetition within a story and downweights words common across topics. Scaling every document vector to unit Euclidean ($L_2$) length removes article-length bias, so predictions depend on the mix of active clues. Multinomial logistic regression then computes four linear topic scores $z_k = w_k^\top x + b_k$ and converts them into topic probabilities via softmax \citep{logisticregression}:
-\begin{equation}
-P(y = k \mid x) = \frac{\exp(z_k)}{\sum_{j=1}^{4}\exp(z_j)}.
-\end{equation}
-At test time, the model picks the topic with the highest score $z_k$, while $L_2$ weight regularization keeps training weights moderate so no single word dominates.
+To avoid collapsing every unfamiliar misspelling into the same fallback vector, \textit{Subword CNN} adopts the character-chunk idea of FastText \citep{bojanowski2017}. Each word combines its full-word vector with learned vectors for overlapping character pieces inside that word. Swapping two interior letters alters pieces spanning the swap while preserving intact prefixes, stems, and suffixes. Both neural networks train all vectors from scratch using dropout (randomly muting half of pooled features during training to prevent memorization), AdamW optimization \citep{adamw}, and validation early stopping.
 
-\section{Convolutional networks}
-Unlike an unordered checklist, \textit{Word CNN} preserves word order \citep{kim2014}. Each known word maps to a learned numeric vector, while any unfamiliar word (including most spelling errors) falls back to one shared unknown-word vector. Parallel filters scan sliding windows of $k$ consecutive words to spot short topic phrases anywhere in the headline or summary.
-
-To combine variable-length filter scans into a fixed summary per article, global max pooling keeps only each filter's single highest score across the text. This design highlights the strongest phrase match regardless of position, though it also creates fragility: if a typo hits the decisive phrase behind a filter's top score, that pooled feature shifts immediately even when neighboring words remain intact.
-
-To avoid collapsing every unfamiliar typo into one blind fallback vector, \textit{Subword CNN} borrows the character-piece idea from FastText \citep{bojanowski2017}. Alongside each word's vector, it averages learned vectors for overlapping character fragments inside that word. Swapping two interior letters alters fragments spanning the swap, yet intact prefix, stem, and suffix chunks still preserve meaning. Every word and fragment vector is learned from scratch on AG News, trained with dropout (randomly muting half of pooled features during training to curb memorization), AdamW optimization \citep{adamw}, and validation early stopping.
-
-Official test article 47, a \emph{Sci/Tech} story about Dell's consumer PC business in China, illustrates how these three representations react when \texttt{china consumer pc} becomes \texttt{china cosnumer pc} at 5\% swaps (Table~\ref{tab:observed-swap}). Because \texttt{consumer} appears intact once more later in the story, \textit{Word TF-IDF LR} retains the unigram at roughly 40\% lower normalized weight, while \textit{Subword CNN} preserves six identical character-fragment buckets at the edited position.
+Official test article 47, a \emph{Sci/Tech} story about Dell's consumer PC business in China, shows how these representations diverge when \texttt{china consumer pc} becomes \texttt{china cosnumer pc} (Table~\ref{tab:observed-swap}). Because \texttt{consumer} appears intact a second time in the article, the linear baseline keeps that word clue active at reduced weight, while the subword network retains six intact character fragments at the corrupted position itself.
 
 \begin{table}[htbp]
 \centering\small
@@ -31,7 +16,9 @@ Official test article 47, a \emph{Sci/Tech} story about Dell's consumer PC busin
 \label{tab:observed-swap}
 \end{table}
 
-\section{Measuring robustness}
-Character perturbations are a well-known vulnerability for text models. Prior work showed that both natural and synthetic letter swaps degrade neural translation \citep{belinkov2018} and text classification unless models use explicit spelling recovery \citep{pruthi2019}. Rather than bolting on a separate spellchecker, we test how much robustness comes naturally from word checklists, word CNNs, and subword chunks, and how much comes from mixing typos into half the training articles in place (unlike synonym-insertion methods that expand dataset size \citep{wei2019}).
+\section{Measuring typo robustness}
+Spelling slips are a well-documented blind spot for text classifiers. Prior studies showed that both natural typos and synthetic letter swaps sharply degrade neural translation \citep{belinkov2018} and sentiment models unless paired with explicit word-recovery layers \citep{pruthi2019}. Rather than bolting on a separate spellchecker, we measure how much built-in protection comes from word checklists, word vectors, and subword chunks under identical clean inputs.
 
-We score models using overall accuracy and macro-averaged $F_1$ (Macro-F1), which combines precision $P_k$ and recall $R_k$ per topic via $F_{1,k} = 2 P_k R_k / (P_k + R_k)$ and averages all four classes equally. Because split-level averages hide offsetting flips, we also track every test article from clean to noisy input, separating newly broken predictions from accidental corrections.
+Training on noisy text offers an alternative defense. Unlike synonym-insertion methods that expand dataset size \citep{wei2019}, our noisy training arm replaces half of each topic's training stories with corrupted copies in place, keeping total article count and class balance fixed. This lets us separate genuine typo robustness from simply having more labeled data.
+
+We evaluate all models with overall accuracy and topic-balanced Macro-F1 (defined alongside our training objective in Chapter~\ref{ch:method}). Because split-level averages hide offsetting mistakes, we also track every test article from clean text to noisy text, separating newly broken predictions from accidental corrections to reveal true routing stability.
