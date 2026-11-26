@@ -4,8 +4,8 @@ Model & Clean representation (\texttt{consumer}) & Corrupted representation (\te
 \midrule
 \textit{Word TF-IDF LR} & Two occurrences of \texttt{consumer} activate its unigram feature, and neither adjacent bigram is in the vocabulary. & \texttt{cosnumer} is out of vocabulary, but the second, unedited \texttt{consumer} keeps the unigram active (at roughly 40\% lower normalized weight). \\
 \addlinespace
-\textit{Word CNN} & Maps the edited position to the learned 96-dimensional embedding for \texttt{consumer}. & Maps the edited position to the shared unknown (\texttt{<unk>}) embedding vector. \\
+\textit{Word CNN} & Maps the edited position to the learned 96-dimensional embedding for \texttt{consumer}. & Maps the edited position to the shared unknown-word embedding vector. \\
 \addlinespace
-\textit{Subword CNN} & Sums the \texttt{consumer} word embedding with the mean of 16 selected character-fragment vectors. & Sums \texttt{<unk>} with the new 16-fragment mean. Six fragments (including \texttt{<co} and \texttt{mer>}) retain their pre-swap hash buckets. \\
+\textit{Subword CNN} & Sums the \texttt{consumer} word embedding with the mean of 16 selected character-fragment vectors. & Sums the unknown-word vector with the new 16-fragment mean. Six fragments (including \texttt{<co} and \texttt{mer>}) retain their pre-swap hash buckets. \\
 \bottomrule
 \end{tabularx}

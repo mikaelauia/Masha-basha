@@ -9,12 +9,12 @@ Project development moved forward in clear stages. After testing the data and co
 \toprule
 Candidate model & Core idea & Mean $J(f)$ (\%) & Role in final study \\
 \midrule
-\textit{Word TF-IDF LR} & Word unigrams and bigrams with logistic regression & 89.51 & Selected baseline: fast, word-only linear reference \\
+\textit{Word TF-IDF LR} & Word unigrams and bigrams with logistic regression & 89.51 & Selected as our fast, word-only linear baseline \\
 Word + char TF-IDF LR & Adds character n-grams to word TF-IDF & 89.75 & Excluded to keep baseline word-only against \textit{Subword CNN} \\
 Interior-sorted TF-IDF LR & Sorts interior word letters before TF-IDF & 89.77 & Excluded because sorting cancels synthetic swaps by design \\
 Frozen encoder + head & Pretrained sentence vectors with neural head & 90.24 & Excluded so all models learn only from our 20,000 articles \\
-\textit{Word CNN} & Word embeddings and width-3, 4, 5 convs (8 epochs) & 86.36 & Selected model 1: word-level neural phrase detector \\
-\textit{Subword CNN} & Adds hashed 3 to 5 char fragments (16 epochs, LR decay) & 87.20 & Selected model 2: top CNN trained from scratch \\
+\textit{Word CNN} & Word embeddings and width-3, 4, 5 convs (8 epochs) & 86.36 & Selected as our word-level neural phrase detector \\
+\textit{Subword CNN} & Adds hashed 3 to 5 char fragments (16 epochs, LR decay) & 87.20 & Selected as our top CNN trained from scratch \\
 \bottomrule
 \end{tabularx}
 \caption[Explored and selected models]{Key candidate models screened on the 4,000-article validation split at seed 42 (mean $J(f)$ across clean and augmented training), showing why the main study narrows to three models: \textit{Word TF-IDF LR}, \textit{Word CNN}, and \textit{Subword CNN}.}
@@ -24,7 +24,7 @@ Frozen encoder + head & Pretrained sentence vectors with neural head & 90.24 & E
 
 We also tested a linear SVM on word TF-IDF features ($89.86\%$ validation $J(f)$) and a 16-epoch word-only CNN schedule check ($86.68\%$ validation $J(f)$). Narrowing the main comparison to \textit{Word TF-IDF LR}, \textit{Word CNN}, and \textit{Subword CNN} keeps the report focused on one clean word-level baseline and two CNNs trained strictly from scratch on our 20,000-article budget, without external pretraining or swap-specific hacks. Once we chose those three recipes and selection rules, we froze everything before scoring the untouched 4,000-article confirmation sample and running the final three-seed evaluations. In post-freeze checks, we also scored the seed-42 16-epoch word-only CNN checkpoints across all official test swap targets (Appendix~\ref{app:decisions}) and tested all 18 saved checkpoints from the three main models on two extra 20\% test swap draws (seeds 41002 and 41003).
 
-\paragraph{Validation objective.}
+\subsection{Validation objective}
 Every candidate setting and neural epoch is scored using a single validation objective $J(f)$ on the 4,000 validation articles. Given clean validation texts $X_v^{(0)}$, 10\%-swap validation texts $X_v^{(10\%)}$ (seed 31001), and true labels $y_v$, $J(f)$ averages Macro-F1 equally across both views:
 \begin{equation}
 J(f) = \frac{1}{2}\Bigl[\operatorname{MacroF1}\bigl(f(X_v^{(0)}), y_v\bigr) + \operatorname{MacroF1}\bigl(f(X_v^{(10\%)}), y_v\bigr)\Bigr].
@@ -49,8 +49,8 @@ $C = 8.0$ & 89.53 & \textbf{89.39} \\
 \end{table}
 \FloatBarrier
 
-\paragraph{Checkpoint selection.}
-Within every neural run, $J(f)$ decides which epoch's weights are saved (Table~\ref{tab:chosen-epochs} and Figure~\ref{fig:learning}). Across the seed-42 development runs, training cross-entropy dropped steadily to the final epoch, from roughly $1.27$ at epoch 1 to $0.226$ and $0.232$ at epoch 8 for \textit{Word CNN} (clean and augmented) and $0.028$ to $0.061$ by epochs 15 and 16 under \textit{Subword CNN}'s longer schedule. Validation Macro-F1 peaked earlier: augmented \textit{Subword CNN} reached $87.25\%$ at epoch 11 and stopped at epoch 15 after four unimproved epochs. Averaging $J(f)$ across clean and augmented training at seed 42 gave $86.36\%$ for \textit{Word CNN} and $87.20\%$ for \textit{Subword CNN}, promoting \textit{Subword CNN} to the full three-seed comparison (reusing seed 42 and fitting seeds 43 and 44).
+\subsection{Checkpoint selection}
+Within every neural run, $J(f)$ decides which epoch's weights are saved (Table~\ref{tab:chosen-epochs} and Figure~\ref{fig:learning}). Across the seed-42 development runs, training cross-entropy dropped steadily to the final epoch, from roughly $1.27$ at epoch 1 to $0.226$ and $0.232$ at epoch 8 for \textit{Word CNN} (clean and augmented) and $0.028$ to $0.061$ by epochs 15 and 16 under \textit{Subword CNN}'s longer schedule. Validation Macro-F1 peaked earlier. Augmented \textit{Subword CNN} reached $87.25\%$ at epoch 11 and stopped at epoch 15 after four unimproved epochs. Averaging $J(f)$ across clean and augmented training at seed 42 gave $86.36\%$ for \textit{Word CNN} and $87.20\%$ for \textit{Subword CNN}, promoting \textit{Subword CNN} to the full three-seed comparison (reusing seed 42 and fitting seeds 43 and 44).
 
 Figure~\ref{fig:learning} also plots the seed-42 16-epoch word-only check (\textit{Scheduled Word CNN} in the legend, mean $J(f) = 86.68\%$) from the validation screen. During epochs 2 to 8, \textit{Subword CNN} held a steady validation lead over that word-only curve of $+0.49$ to $+1.78$ percentage points (clean) and $+0.48$ to $+1.42$ points (augmented) before learning-rate halving kicked in (epoch 12 for the word-only run, and epochs 15 and 11 for clean and augmented \textit{Subword CNN}).
 
@@ -84,7 +84,6 @@ Extra 20\% swap draws & Frozen checkpoints, 7,600 test articles, $p = 20\%$ targ
 
 Independent seeds separate data splitting (2026), model fitting (42, 43, 44), validation corruption (31001), and test corruption (41001, plus 41002 and 41003). Because partitions and evaluation swaps stay fixed across runs, seed-to-seed variation reflects neural initialization, batch shuffling, and (in the augmented arm) which 10,000 training articles and words are corrupted. Within each seed, all three augmented models share the exact same training corpus.
 
-\paragraph{Evaluation splits.}
 Table~\ref{tab:evaluation-coverage} summarizes all four evaluation settings. The 4,000-article validation split drives tuning and early stopping, while the separate 4,000-article confirmation sample tests frozen seed-42 checkpoints at 0\% and 10\% swaps to make sure model rankings hold on uninspected articles. Because the confirmation check scores only seed 42 and the main official test table averages seeds 42, 43, and 44, we report the two splits separately and compare their qualitative ordering.
 
 \begin{table}[!htbp]
@@ -109,10 +108,8 @@ Extra swap draws ($N = 7{,}600$) & 20\% (41002, 41003) & All 18 saved fits acros
 \section{Metrics and cost}
 We evaluate all models with overall accuracy and Macro-F1 (\%, random baseline $25.00\%$), backed up by per-topic $F_1$ scores, confusion matrices, and paired article transitions. Full seed-level breakdowns appear in Appendix~\ref{app:decisions}. Clean-trained \textit{Word TF-IDF LR} is deterministic ($s = 0$), while the augmented baseline and both neural models report the mean and sample standard deviation ($s$, with $n - 1 = 2$ degrees of freedom) across seeds 42, 43, and 44.
 
-\paragraph{Bootstrap intervals.}
 To measure test-set sampling uncertainty around accuracy differences on the 7,600 official test articles, we use a class-stratified paired bootstrap over articles. For article $i \in \{1, \dots, 7{,}600\}$ and seed $s \in \{42, 43, 44\}$, correctness indicators $c_{i,s}^{(A)}, c_{i,s}^{(B)} \in \{0, 1\}$ define per-seed differences $d_{i,s} = c_{i,s}^{(A)} - c_{i,s}^{(B)} \in \{-1, 0, +1\}$ and three-seed article averages $\bar{d}_i = \frac{1}{3}\sum_{s} d_{i,s}$, whose mean across all 7,600 articles equals the exact difference in three-seed mean accuracy. We draw 2,000 replicates by resampling 1,900 articles with replacement inside each true topic (using seed 92123 for augmentation intervals and seed 71102 for \textit{Subword CNN} vs.\ \textit{Word CNN}), carrying each sampled article's $\bar{d}_i$ into the replicate mean. The 2.5th and 97.5th percentiles give a pointwise 95\% confidence interval conditional on fitted checkpoints and swap draw, which we interpret alongside individual seeds and extra swap draws.
 
-\paragraph{Training cost.}
-All runs ran on a Windows 11 workstation using four logical CPU threads without GPU acceleration (Appendix~\ref{app:repro}). Table~\ref{tab:fit-cost-review} compares parameter counts and fit times across the six main runs per model (three seeds $\times$ two arms, counted once per fit from clean evaluation logs): \textit{Word TF-IDF LR} tunes all three $C$ candidates in a median of 13 seconds, compared with 219 seconds ($\approx 17\times$) for \textit{Word CNN} and 642 seconds ($\approx 50\times$, from unrounded medians) for \textit{Subword CNN}.
+Alongside accuracy and uncertainty, we track runtime on a Windows 11 workstation using four logical CPU threads without GPU acceleration (Appendix~\ref{app:repro}). Table~\ref{tab:fit-cost-review} compares parameter counts and fit times across the six main runs per model (three seeds $\times$ two arms, counted once per fit from clean evaluation logs). \textit{Word TF-IDF LR} tunes all three $C$ candidates in a median of 13 seconds, compared with 219 seconds ($\approx 17\times$) for \textit{Word CNN} and 642 seconds ($\approx 50\times$, from unrounded medians) for \textit{Subword CNN}.
 
 \input{tables/fit-cost-review}
