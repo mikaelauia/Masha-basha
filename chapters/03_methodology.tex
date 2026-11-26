@@ -1,28 +1,30 @@
 \chapter{Methodology}\label{ch:method}
 
 \section{Preparing the data}
-We build all splits from a complete CSV mirror of AG News titles and descriptions \citep{agmirror,zhang2015} matching the standard benchmark pool of 120,000 training and 7,600 test stories \citep{torchtext}. Figure~\ref{fig:data-partitions} shows how raw items are cleaned, filtered, and separated into disjoint partitions before any modeling begins.
+Experiments use a complete CSV mirror of AG News titles and descriptions \citep{agmirror,zhang2015} matching the canonical \texttt{torchtext} benchmark splits of 120,000 training and 7,600 test articles across four balanced categories \citep{torchtext}. Figure~\ref{fig:data-partitions} traces how raw records are audited, deduplicated, and divided into strictly disjoint partitions for training, validation, final testing, and confirmation.
 
-\begin{figure}[!htbp]
+\begin{figure}[tbp]
 \centering
-\includegraphics[width=.76\linewidth]{figures/data_partitions.pdf}
+\includegraphics[width=.64\linewidth]{figures/data_partitions.pdf}
 \caption[Data filtering and partitions]{Filtering and stratified partitioning of the AG News dataset. Training articles matching an official test item after normalization are removed before sampling disjoint subsets.}
 \label{fig:data-partitions}
 \end{figure}
 
-Every article keeps a permanent identifier and integer topic label so clean and corrupted predictions can always be matched one-to-one. Text normalization joins title and description with a space, converts to lowercase, keeps contiguous ASCII letter runs via \artifact{[a-z]+}, caps length at 128 words, and skips stemming or stopword removal to preserve natural phrase order. Prior to sampling, deduplication strips any training articles matching the untouched 7,600-item test set along with exact repeats and conflicting duplicates.
+During ingestion, every record retains a permanent article identifier and class index so clean and corrupted outputs always align one-to-one. All models read only the concatenated title and description under one shared normalization rule: lowercasing text, extracting contiguous alphabetic sequences matching \artifact{[a-z]+}, capping length at 128 words, and rejoining with spaces. Skipping stemming, lemmatization, and stopword removal preserves natural phrase boundaries and word forms between headline and summary.
 
-From the cleaned pool, stratified sampling draws 20,000 training articles, 4,000 validation articles, and 4,000 untouched confirmation articles with zero text or ID overlap across splits. Virtually every article fits inside the 128-word cap used to align neural sequence padding with the linear baseline. Dropping digits and punctuation removes some secondary cues (Figure~\ref{fig:normalization-cues}), especially currency signs in \emph{Business} stories and numeric scores in \emph{Sports}, while keeping every model focused strictly on alphabetic wording.
+Before drawing development partitions, an exact-string audit across the 120,000 normalized training rows removes 38 entries matching an official test article, 79 rows from duplicate groups with conflicting topic labels, and 326 exact duplicate training copies (retaining the first occurrence). All 7,600 official test articles (1,900 per topic) remain completely untouched for benchmark comparability, even though one normalized string repeats internally. From the 119,557 filtered candidates, stratified sampling draws 20,000 training articles (5,000 per topic) and 4,000 validation articles (1,000 per topic). A separate 4,000-article confirmation split is drawn from the remaining filtered pool after excluding 16 real rows touched in an early plumbing smoke check, and post-split checks verify zero identifier or normalized-text overlap across all four splits.
 
-\begin{figure}[!htbp]
+Fixing a 128-word cap aligns CNN padding with the linear baseline while truncating virtually nothing (only 18 training items and five official test items exceed 128 words, and at most 0.54\% of training entries exceed 128 subword pieces in any class). Still, stripping non-alphabetic symbols removes distinct surface cues uncovered by our pre-modeling dataset audit (Figure~\ref{fig:normalization-cues}). Currency signs appear in 17.0\% of raw \emph{Business} training stories versus 6.0\% or less elsewhere, numeric digits span from 47.4\% in \emph{World} up to 70.0\% in \emph{Sports}, and uppercase acronyms (such as \texttt{US}) appear in 56.4\% to 64.0\% of articles across topics before lowercasing merges them. Evaluating whether digits, casing, or currency symbols improve accuracy is left outside our uniform alphabetic pipeline.
+
+\begin{figure}[tbp]
 \centering
-\includegraphics[width=.74\linewidth]{figures/normalization_cues.pdf}
+\includegraphics[width=.62\linewidth]{figures/normalization_cues.pdf}
 \caption[Removed surface cues]{Percentage of the 20,000 selected training articles (5,000 per topic) containing digits or currency symbols prior to alphabetic normalization.}
 \label{fig:normalization-cues}
 \end{figure}
 
 \section{Generating spelling swaps}\label{sec:noise}
-We create spelling noise by swapping one adjacent pair of unequal middle letters inside eligible words. A word qualifies only if it has at least four letters and at least one pair of differing interior neighbors, sparing short function words (such as \texttt{the} or \texttt{oil}) and uniform middles (such as \texttt{seen}). Each article uses an independent per-record random stream that draws both the swap chance and candidate index before comparing against swap target $p$ (Listing~\ref{lst:swap-word}), ensuring identical edits across batch orderings and strictly nested swaps as noise rises from 5\% to 10\% and 20\%.
+Controlled spelling noise is applied deterministically by swapping one random pair of unequal adjacent interior letters inside eligible words. A word is eligible only if it contains at least four letters and at least one pair of differing neighbors inside its outer letters, leaving short words (such as \texttt{the} and \texttt{oil}) and uniform middles (such as \texttt{seen}) unchanged. Using a dedicated per-article random generator keeps edits invariant to batch ordering, and drawing both the swap chance and candidate index before comparing against swap probability $p$ (Listing~\ref{lst:swap-word}) guarantees strictly nested corruptions as noise scales across 5\%, 10\%, and 20\% targets.
 
 \begin{lstlisting}[language=Python,keywordstyle=\color{darkgreen},caption={[Letter-swap logic]Core logic for swapping letters in one word. Counters are omitted.},label={lst:swap-word},float=htbp]
 def swap_word(word, probability, rng):
@@ -36,33 +38,37 @@ def swap_word(word, probability, rng):
     return word[:index] + word[index + 1] + word[index] + word[index + 2:]
 \end{lstlisting}
 
-Validation tunes on clean and 10\%-swapped views, official testing sweeps 0\%, 5\%, 10\%, and 20\% targets, confirmation tests 0\% and 10\%, and follow-up checks evaluate two additional random typo sets at 20\% (full seed IDs appear in Appendix~\ref{app:repro}). Because roughly two-thirds of test words are eligible (Figure~\ref{fig:swap-exposure}), the 20\% target alters around one in eight tokens overall and introduces at least one typo into nearly every article.
+Validation tunes on clean (0\%) and 10\%-swapped splits, main testing evaluates 0\%, 5\%, 10\%, and 20\% targets, confirmation tests 0\% and 10\%, and follow-up checks re-score saved models across two additional random 20\% draws (all RNG seed values are archived in Appendix~\ref{app:repro}). Across the 7,600 official test articles (289,990 total words, of which 187,152 are eligible, Figure~\ref{fig:swap-exposure}), targeting 20\% of eligible words swaps 20.03\% of eligible tokens (12.93\% of all words, or 37,494 words), touching 99.1\% of articles (7,533 of 7,600).
 
-\begin{figure}[!htbp]
+\begin{figure}[htb]
 \centering
-\includegraphics[width=.74\linewidth]{figures/swap_exposure.pdf}
+\includegraphics[width=.62\linewidth]{figures/swap_exposure.pdf}
 \caption[Realized swap exposure]{Realized corruption across the 7,600 official test articles versus swap target $p$, showing modified token share (left) and share of affected articles (right).}
 \label{fig:swap-exposure}
 \end{figure}
 
-Using the exact same swap function, every model trains under two parallel arms on the 20,000-article budget. The clean arm uses all untouched stories, while the augmented arm swaps half of each topic's training stories once per run at the 10\% target in place. That edits roughly 9,100 articles and just over 3\% of training tokens per run, trading clean word repetitions for exposure to corrupted spellings.
+Using this exact routine, every model trains under two parallel arms on the fixed 20,000-article budget. The clean arm feeds untouched articles, while the augmented arm samples 50\% of each topic's training stories once per run without replacement (10,000 articles total), applies swaps at the 10\% target, and substitutes them in place. Per run, this edits roughly 9,100 articles and 3.2\% of training tokens (for example, 24,791 tokens on the primary run), halving clean exposure on edited stories while shifting vocabulary entries and term frequencies before training starts.
 
 \section{How models work}\label{sec:models}
-All three classifiers read the same cleaned token sequence and output four topic scores (Figure~\ref{fig:model-flow}). Fitted only on the active training arm, \textit{Word TF-IDF LR} builds a vocabulary of up to 50,000 single words and two-word pairs appearing at least twice, which naturally ignores one-off training typos under noisy training.
+All three primary pipelines consume identical normalized strings and emit four topic logits (Figure~\ref{fig:model-flow}). Fitted strictly on the active training arm, \textit{Word TF-IDF LR} extracts single words and adjacent word pairs appearing in at least two training articles, capping vocabulary at the top 50,000 corpus terms. Dropping single-occurrence terms automatically ignores rare one-off training typos under noisy training while fitting 200,004 linear weights and intercepts across four topics.
 
-\begin{figure}[!htbp]\centering
+\begin{figure}[tbp]\centering
 \includegraphics[width=.76\linewidth]{figures/core_prediction_flow.pdf}
 \caption[Model prediction pipelines]{Prediction flow from normalized text to four topic scores. \textit{Subword CNN} adds character-fragment vectors to each word vector before sharing the same convolution and pooling steps as \textit{Word CNN}.}\label{fig:model-flow}
 \end{figure}
 
-In the neural pipelines, \textit{Word CNN} assigns IDs to the top 29,998 training words plus padding and a shared unknown-word token (\texttt{<unk>}), mapping each 128-word sequence into 96-dimensional embeddings. Under noisy training, recurring misspellings can enter that vocabulary directly (accounting for over 60\% of swapped test tokens in our primary run). Three parallel convolutional layers then scan windows of three, four, and five words (64 filters each) with $\operatorname{ReLU}$ activations, masked max pooling ignores tail padding to produce 192 features, and 0.5 dropout precedes the linear output head (Figure~\ref{fig:word-cnn-forward}).
+In the neural pipelines, \textit{Word CNN} builds a 30,000-row lookup table containing the 29,998 most common training words alongside right-padding (index 0, frozen at zero) and a shared unknown-word placeholder (\texttt{<unk>}, index 1). Any test word outside the training table maps to \texttt{<unk>}, though recurring training typos enter the augmented vocabulary (in the primary run, 60.9\% of swapped test tokens matched repeated training typos learned during augmentation).
 
-\begin{figure}[!htbp]\centering
-\includegraphics[width=.76\linewidth]{figures/word_cnn_forward.pdf}
+Each 128-token padded sequence looks up 96-dimensional embeddings initialized from standard normal weights, then passes through three parallel 1D convolution layers (64 filters each at kernel widths three, four, and five) with $\operatorname{ReLU}$ activations. Length-masked global max pooling masks padding slots beyond valid document windows to negative infinity before taking the peak per filter, yielding 192 features passed through 0.5 training dropout into a linear classifier head (Figure~\ref{fig:word-cnn-forward}).
+
+\begin{figure}[tbp]\centering
+\includegraphics[width=.78\linewidth]{figures/word_cnn_forward.pdf}
 \caption[CNN forward pass]{Tensor shapes through \textit{Word CNN} and \textit{Subword CNN}. \textit{Subword CNN} adds hashed character-fragment vectors before identical convolution, masked pooling, dropout, and linear classification.}\label{fig:word-cnn-forward}
 \end{figure}
 
-Building directly on that layout, \textit{Subword CNN} frames every token with boundary markers (\texttt{<} and \texttt{>}), extracts all three-to-five-letter character fragments (evenly subsampling up to 16 per word), and hashes each fragment into an 8,192-slot character table plus padding. Table~\ref{tab:cnn-parameter-breakdown} compares parameter sizes, showing roughly three million parameters in \textit{Word CNN} and 3.74 million with character fragments added.
+Extending that architecture, \textit{Subword CNN} retains raw token text so distinct unseen misspellings avoid colliding into \texttt{<unk>}. Each word is wrapped with boundary markers (\texttt{<} and \texttt{>}) and split left-to-right into character fragments of lengths three, four, and five, subsampling 16 evenly spaced positions across prefix, stem, and suffix when a word exceeds 16 pieces.
+
+Each fragment maps via a 64-bit \texttt{BLAKE2b} hash modulo 8,192 into a compact embedding table (8,192 active buckets plus frozen zero-pad slot 0). Rather than materializing a memory-heavy three-dimensional character tensor, the forward pass averages active bucket vectors directly via \texttt{EmbeddingBag} and sums them with the word vector. Adding the fragment table increases stored parameters by 26.6\%, from roughly 2.95 million in \textit{Word CNN} to 3.74 million in \textit{Subword CNN} (Table~\ref{tab:cnn-parameter-breakdown}).
 
 \begin{table}[htbp]
 \centering\small
@@ -71,7 +77,7 @@ Building directly on that layout, \textit{Subword CNN} frames every token with b
 Architecture component & \textit{Word CNN} & \textit{Subword CNN} \\
 \midrule
 Word embedding table ($30{,}000 \times 96$) & 2,880,000 & 2,880,000 \\
-Convolutional filters and biases ($k \in \{3, 4, 5\}$, 64 each) & 73,920 & 73,920 \\
+Convolutional filters and biases (64 each at widths 3, 4, 5) & 73,920 & 73,920 \\
 Linear classification head ($192 \times 4 + 4$) & 772 & 772 \\
 Character fragment embedding table ($8{,}193 \times 96$) & 0 & 786,528 \\
 \midrule
@@ -82,7 +88,7 @@ Total stored parameters & 2,954,692 & 3,741,220 \\
 \label{tab:cnn-parameter-breakdown}
 \end{table}
 
-Table~\ref{tab:article-trace} traces official test article 0 (\emph{Fears for T N pension after talks}, a 25-word \emph{Business} story) across the clean-trained models, showing how sparse word matching and 128-token padded pooling process the exact same story.
+Table~\ref{tab:article-trace} traces official test article 0 (\emph{Fears for T N pension after talks}, a 25-word \emph{Business} story) step by step from cleaned text to prediction across the primary clean-trained models, showing how sparse vocabulary matching and masked 128-token convolution windows operate on an individual input.
 
 \begin{table}[!htbp]
 \centering\small
@@ -90,13 +96,13 @@ Table~\ref{tab:article-trace} traces official test article 0 (\emph{Fears for T 
 \toprule
 Pipeline stage & Representation and scoring on official test article 0 (25 words) \\
 \midrule
-\textit{Word TF-IDF LR} & Activates 29 of 50,000 fitted word and pair features, then applies the four topic weights and intercepts. \\
+\textit{Word TF-IDF LR} & Activates 29 of 50,000 fitted word and pair features, multiplying the normalized vector by class weights plus intercepts. \\
 \addlinespace[2pt]
-\textit{Word CNN} & Maps 25 word IDs plus 103 zero pads to $128 \times 96$ embeddings and pools over valid windows into 192 features. \\
+\textit{Word CNN} & Maps 25 word IDs plus 103 zero pads to embeddings and max-pools over 23, 22, and 21 valid windows into 192 features. \\
 \addlinespace[2pt]
-\textit{Subword CNN} & Adds up to 16 character fragments per word (such as 16 from \texttt{pension}) before identical pooling over valid windows. \\
+\textit{Subword CNN} & Averages up to 16 hashed character fragments per word (such as 16 from \texttt{pension}) before identical masked pooling. \\
 \addlinespace[2pt]
-Final prediction & All three clean-trained models assign the highest score to \emph{Business}, matching the true label. \\
+Final prediction & All three clean-trained models assign the highest logit to \emph{Business}, matching the true label and replay logs. \\
 \bottomrule
 \end{tabularx}
 \caption[Single-article prediction trace]{Trace of official test article 0 (25 normalized words, true topic \emph{Business}) through the primary clean-trained models.}
@@ -104,15 +110,15 @@ Final prediction & All three clean-trained models assign the highest score to \e
 \end{table}
 
 \section{Scoring and training}
-This section gathers the mathematical definitions used across all models. In \textit{Word TF-IDF LR}, term $t$ occurring $f_{td} > 0$ times in document $d$ is weighted by $(1 + \log f_{td})(1 + \log \frac{1 + N}{1 + \mathrm{df}_t})$ over $N$ training stories and document count $\mathrm{df}_t$, then divided by its Euclidean ($L_2$) norm into vector $x$. Multinomial logistic regression computes linear class scores $z_k = w_k^\top x + b_k$ and maps them to topic probabilities via softmax, fitted with $L_2$ weight regularization (L-BFGS):
+This section consolidates all mathematical formulations used for scoring, training, and model selection. In \textit{Word TF-IDF LR}, each term $t$ occurring $f_{td} > 0$ times in document $d$ receives sublinear TF-IDF weight $(1 + \log f_{td})(1 + \log \frac{1 + N}{1 + \mathrm{df}_t})$ over $N$ training stories and document count $\mathrm{df}_t$, scaled to unit $L_2$ norm to yield feature vector $x$. Multinomial logistic regression computes four linear class scores $z_k = w_k^\top x + b_k$ and converts them into topic probabilities via softmax, optimized using $L_2$-regularized cross-entropy via L-BFGS:
 \begin{equation}
 P(y = k \mid x) = \frac{\exp(z_k)}{\sum_{j=1}^{4}\exp(z_j)}.
 \end{equation}
 
-In the neural models, \textit{Subword CNN} forms each token representation as $e(w) = e_{\mathrm{word}}(w) + \frac{1}{|G(w)|}\sum_{g \in G(w)} e_{\mathrm{char}}(h(g))$ over selected character fragments $G(w)$ and hash bucket $h(g)$. Both networks train on mini-batches of $B = 128$ articles minimizing batch mean cross-entropy loss,
+In the neural architectures, \textit{Subword CNN} sets each token embedding to $e(w) = e_{\mathrm{word}}(w) + \frac{1}{|G(w)|}\sum_{g \in G(w)} e_{\mathrm{char}}(h(g))$ over active character fragments $G(w)$ and bucket indices $h(g)$. Both networks train with mini-batches of $B = 128$ articles minimizing batch mean cross-entropy loss,
 \begin{equation}
 L = -\frac{1}{B}\sum_{i=1}^{B} \log P(y_i \mid x_i) = -\frac{1}{B}\sum_{i=1}^{B} \log \frac{\exp(z_{i, y_i})}{\sum_{j=1}^{4}\exp(z_{i,j})},
 \end{equation}
-using AdamW \citep{adamw} (initial learning rate $10^{-3}$, weight decay $10^{-4}$, gradient norm clipped at 5.0) across three independent runs per arm (seed IDs in Appendix~\ref{app:decisions}). \textit{Word CNN} runs up to 8 epochs (patience 2, fixed learning rate), while \textit{Subword CNN} runs up to 16 epochs (patience 4, halving the learning rate after 2 unimproved epochs).
+updating parameters via AdamW \citep{adamw} (initial learning rate $10^{-3}$, weight decay $10^{-4}$, global gradient $L_2$ norm clipped at 5.0) across three independent runs per training arm (seed assignments are listed in Appendix~\ref{app:decisions}). \textit{Word CNN} runs up to 8 epochs (patience 2, fixed learning rate), while \textit{Subword CNN} runs up to 16 epochs (patience 4) with \texttt{ReduceLROnPlateau} halving the learning rate after 2 unimproved validation epochs.
 
-Evaluation reports overall accuracy alongside Macro-F1, which averages $F_{1,k} = 2 P_k R_k / (P_k + R_k)$ equally across all four topics. For tuning linear regularization ($C$ among 0.5, 2.0, and 8.0) and saving the best neural epoch, we pick the setting maximizing the unweighted average of Macro-F1 on clean validation articles and 10\%-swapped validation articles. Automated replay verifies exact prediction parity from all saved checkpoints (Appendix~\ref{app:repro}).
+Classification quality is measured by overall accuracy alongside Macro-F1, which computes per-topic harmonic mean $F_{1,k} = 2 P_k R_k / (P_k + R_k)$ from precision $P_k$ and recall $R_k$ and averages equally across the four balanced topics. Within every run, regularization tuning for linear models ($C$ among 0.5, 2.0, and 8.0) and neural checkpoint early stopping maximize the unweighted average of clean validation Macro-F1 and 10\%-swapped validation Macro-F1. Once saved, an automated verification command reloads serialized vectorizers, weights, vocabularies, and hash functions to confirm exact article-level prediction reproducibility across all checkpoints (Appendix~\ref{app:repro}).

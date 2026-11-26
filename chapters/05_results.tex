@@ -1,18 +1,18 @@
 \chapter{Results}\label{ch:results}
 
 \section{Accuracy under typos}\label{sec:swap-sensitivity}
-We evaluated all three classifiers across the 7,600 official AG News test articles, averaging three training runs for stochastic setups while recording full per-run numbers in Appendix~\ref{app:decisions}. When trained purely on clean text and tested under growing typo rates (Figure~\ref{fig:core-robustness} and Table~\ref{tab:corefull}), every model loses accuracy, though the gap between architectures widens steadily.
+We evaluated all three scratch-trained models across the 7,600 official AG News test articles, averaging three independent runs for non-deterministic setups while keeping per-run tables in Appendix~\ref{app:decisions}. Under clean training, accuracy falls monotonically for every classifier as middle-letter swaps increase from 0\% to 20\% of eligible words, though the magnitude of the loss differs sharply by representation (Figure~\ref{fig:core-robustness} and Table~\ref{tab:corefull}).
 
 \begin{figure}[!htbp]\centering
-\includegraphics[width=.76\linewidth]{figures/core_robustness.pdf}
+\includegraphics[width=.75\linewidth]{figures/core_robustness.pdf}
 \caption[Accuracy across swap targets]{Official test accuracy (\%) across typo levels under clean training. Error bars show $\pm 1$ standard deviation across the three neural runs ($0.43$ percentage points for \textit{Word CNN} and $0.76$ for \textit{Subword CNN} at 20\% swaps).}\label{fig:core-robustness}
 \end{figure}
 
-The linear baseline, \textit{Word TF-IDF LR}, leads comfortably from the outset at just over 90\% accuracy and loses less than a single percentage point even when one in five eligible words contains a swap. Even under the heaviest spelling noise, it stays nearly four percentage points ahead of both neural networks.
+The sparse linear baseline, \textit{Word TF-IDF LR}, leads at every corruption level. Starting at 90.05\% on clean articles, it loses only 0.91 percentage points across the entire sweep to finish at 89.14\% under 20\% swaps, staying nearly four percentage points ahead of both neural models even under the heaviest noise.
 
-Both CNNs fall noticeably faster as words break. \textit{Word CNN} suffers the sharpest drop of roughly 2.3 percentage points across the sweep because unfamiliar misspellings collapse into its generic unknown-word placeholder. Adding overlapping character fragments in \textit{Subword CNN} cushions around half a point of that loss, keeping it consistently ahead of the word-only network at every noise setting.
+Both convolutional architectures suffer roughly double the relative degradation. \textit{Word CNN} drops steepest by 2.31 percentage points (from 86.79\% down to 84.48\%) because swapping an interior pair usually produces an unseen surface spelling. Vocabulary coverage audits confirm this vulnerability: out-of-vocabulary token rates in \textit{Word CNN}'s 30,000-entry vocabulary jump fourfold from 2.01\% on clean validation text to 8.13\% at 10\% swaps under clean training. Enriching words with character fragments in \textit{Subword CNN} cushions roughly half a point of that drop (falling 1.86 points from 87.18\% to 85.32\%), keeping it ahead of \textit{Word CNN} across all clean-trained swap rates.
 
-\begin{table}[tbp]\centering\small
+\begin{table}[!htbp]\centering\small
 \begin{tabular}{llrrrr}\toprule
 Model & Training arm & 0\% swaps & 5\% swaps & 10\% swaps & 20\% swaps \\\midrule
 \textit{Word TF-IDF LR} & Clean & 90.05 / 90.03 & 89.84 / 89.82 & 89.61 / 89.59 & 89.14 / 89.12 \\
@@ -25,14 +25,16 @@ Model & Training arm & 0\% swaps & 5\% swaps & 10\% swaps & 20\% swaps \\\midrul
 \caption[Official test results]{Official test accuracy / Macro-F1 (\%) across typo rates and training arms. Non-deterministic rows average three independent runs, with run standard deviations in Appendix~\ref{app:decisions}.}\label{tab:corefull}\end{table}
 
 \section{Training with typos}
-Next, we test whether mixing 10\%-swapped stories into half of the training set helps classifiers handle 20\% test noise without losing clean accuracy. As Figure~\ref{fig:augmentation-review} and Table~\ref{tab:corefull} show, noisy training helps \textit{Subword CNN} most, raising its three-run average by nearly half a percentage point (and putting it 1.3 points above augmented \textit{Word CNN}, though training schedule length explains part of that gap in Section~\ref{sec:limitations}). Inside those subword runs, individual fits still disagree noticeably, ranging from a full-point gain on the primary run down to a slight dip on the third.
+Next, we examine whether substituting 10\%-swapped copies into half of the training set improves noisy-text accuracy without hurting clean accuracy. At 20\% test noise, static augmentation raises out-of-vocabulary coverage (cutting 10\%-swap validation unknown rates from 8.13\% to 4.99\%) and helps \textit{Subword CNN} most, boosting its three-run average by 0.46 percentage points from 85.32\% to 85.77\% (Figure~\ref{fig:augmentation-review}). That leaves augmented \textit{Subword CNN} 1.30 percentage points above augmented \textit{Word CNN} (84.47\%), though extending training length explains much of that gap in Section~\ref{sec:limitations}. Even inside \textit{Subword CNN}, run-to-run behavior is uneven, spanning from just over a one-point gain on the primary run down to a slight loss on the third run.
 
 \begin{figure}[!htbp]\centering
-\includegraphics[width=.78\linewidth]{figures/augmentation_review.pdf}
+\includegraphics[width=.76\linewidth]{figures/augmentation_review.pdf}
 \caption[Augmentation accuracy gains]{Accuracy gains (augmented minus clean training, percentage points) at the main 20\% test swap target. Markers plot the three individual training runs (labeled Fit 42, Fit 43, and Fit 44), and diamonds show three-run averages with 95\% confidence intervals.}\label{fig:augmentation-review}
 \end{figure}
 
-Neither the linear baseline nor \textit{Word CNN} gains meaningfully from noisy training, with confidence intervals for both crossing zero on noisy and clean text alike. Scoring all saved checkpoints against two extra independent random sets of 20\% typos yields the exact same story (Table~\ref{tab:augmentation-draws}): \textit{Word TF-IDF LR} wins every draw, the subword model keeps a steady 0.3 to 0.5 point average boost, and the word-only CNN stays essentially flat.
+For the other two models, static augmentation produces essentially no real gain under heavy noise. \textit{Word TF-IDF LR} shifts upward by 0.11 points alongside its looser validation penalty, while \textit{Word CNN} finishes flat at 84.47\%. Notice a subtle detail inside \textit{Word CNN}: its clean-to-20\% accuracy drop narrows slightly under augmentation (2.10 points instead of 2.31), yet only because clean accuracy dipped by 0.22 points rather than because noisy accuracy improved. On clean test text, confidence intervals for all three models cross zero, showing no clear aggregate clean change on the official split.
+
+Re-scoring all 18 saved checkpoints across two additional independent random 20\% test draws yields identical conclusions (Table~\ref{tab:augmentation-draws}). The linear baseline leads every draw in both arms, \textit{Subword CNN} retains a consistent 0.31 to 0.46 point average augmentation boost (led by the same primary run while the third run stays negative), and \textit{Word CNN} switches sign around zero.
 
 \begin{table}[!htbp]
 \centering\small
@@ -49,16 +51,18 @@ Model & Main 20\% set & Second 20\% set & Third 20\% set \\
 \label{tab:augmentation-draws}
 \end{table}
 
-Beneath those stable overall scores, individual article predictions shift noticeably whenever a fresh random set of words gets scrambled. Across the three 20\% draws, fixed clean checkpoints flip right-or-wrong outcomes on roughly 6\% of articles for the linear baseline compared with over 11\% for both CNNs, illustrated by test article 0 (the pension story in Table~\ref{tab:article-trace}), where \textit{Subword CNN} mislabeled two draws before predicting \emph{Business} on the third. Checking frozen primary-run models on 4,000 completely untouched confirmation articles (Table~\ref{tab:held-out-review}) confirms the exact same model ranking while surfacing a small clean-text trade-off for augmented \textit{Subword CNN}, where a noisy-text gain comes with roughly a half-point dip on clean text.
+Stable aggregate numbers still hide substantial article-level movement across random typo draws. Across the three 20\% draws, fixed clean checkpoints flip correctness on 6.1\% of test articles for \textit{Word TF-IDF LR}, compared with over 11\% for both CNNs (11.8\% in \textit{Word CNN} and 11.3\% in \textit{Subword CNN}). Official test article 0 (traced in Table~\ref{tab:article-trace}) shows this directly: clean \textit{Subword CNN} mislabeled it as \emph{World} on two draws before predicting \emph{Business} on the third, while the linear baseline succeeded on every draw.
+
+Evaluating frozen primary-run models on the untouched 4,000-article confirmation sample confirms every model ranking from the official test sweep (Table~\ref{tab:held-out-review}). Augmented \textit{Subword CNN} again leads augmented \textit{Word CNN} by 1.30 percentage points at 10\% swaps (86.75\% versus 85.45\%) while gaining 0.60 points over clean \textit{Subword CNN}, yet also reveals a 0.45 point clean-text dip on unseen articles (88.12\% down to 87.68\%).
 
 \input{tables/held-out-review}
 
-\section{Errors and flips}\label{sec:error-analysis}
-Headline percentages mask uneven topic vulnerability and heavy two-way churn on the primary clean-trained runs. Broken down by topic (Tables~\ref{tab:topic-f1} and~\ref{tab:topic-correct-change}), \emph{Sports} remains easiest for all three models thanks to distinctive team and athlete names, while \emph{Business} is hardest everywhere and accounts for roughly nine out of ten net lost neural predictions under heavy swaps.
+\section{Topic errors and flips}\label{sec:error-analysis}
+Inspecting per-topic metrics and individual failed predictions from our primary clean-trained run explains where errors occur. Topic $F_1$ scores differ sharply across the four categories (Table~\ref{tab:topic-f1}): \emph{Sports} stays above 90\% $F_1$ everywhere even under 20\% swaps thanks to distinctive player, club, and league vocabularies, while \emph{Business} scores lowest and absorbs roughly 90\% of total net lost predictions in both CNNs (losing 172 and 181 articles out of 1,900, compared with just 28 in the linear baseline, Table~\ref{tab:topic-correct-change}).
 
 \input{tables/topic-f1}
 
-Paradoxically, both neural networks actually label around 30 \emph{more} true \emph{World} stories correctly at 20\% swaps even while their \emph{World} $F_1$ drops sharply (Table~\ref{tab:topic-correct-change}). Whenever typos erase specialized financial or technical terms, the CNNs default to \emph{World} and \emph{Sci/Tech}, inflating \emph{World} false alarms from 215 to nearly 400 in \textit{Subword CNN} (Table~\ref{tab:confusion-review}).
+Both neural networks also display an illuminating pattern in \emph{World}: net true \emph{World} hits rise slightly at 20\% swaps (up 28 and 31 articles, Table~\ref{tab:topic-correct-change}) even as \emph{World} $F_1$ falls by roughly three percentage points. When spelling swaps knock out specific financial or technical words, CNNs default to \emph{World} and \emph{Sci/Tech}, pushing false-positive \emph{World} predictions in \textit{Subword CNN} up from 215 to 399. Its confusion matrix at 20\% swaps (Table~\ref{tab:confusion-review}) shows 320 true \emph{Business} items mislabeled as \emph{Sci/Tech} (up from 239) and 187 mislabeled as \emph{World} (up from 92), mostly corporate technology reports and international economic stories.
 
 \begin{table}[!htbp]
 \centering\small
@@ -80,18 +84,18 @@ Total net change ($N = 7{,}600$) & $-69$ & $-190$ & $-201$ \\
 
 \input{tables/confusion-review}
 
-Four individual 20\%-swap articles scored by clean-trained \textit{Subword CNN} show how specific word swaps drive these errors and occasional fixes:
-\begin{itemize}
-\item An Australian insurance story swaps \texttt{insurer} to \texttt{inusrer}, \texttt{disastrous} to \texttt{disasrtous}, and \texttt{pushed} to \texttt{pusehd}, leaving country names intact and pulling \emph{Business} into \emph{World}.
-\item A report on doctors halting surgeries swaps \texttt{surgeries} to \texttt{surgreies}, weakening medical-insurance cues and flipping \emph{Business} to \emph{World}.
-\item A telecom wiretap piece swaps \texttt{push} to \texttt{psuh} inside \texttt{push to talk}, softening technology cues so regulatory wording pulls \emph{Sci/Tech} into \emph{World}.
-\item On the other hand, a Honda Formula One story mislabeled as \emph{Sci/Tech} on clean text corrupts \texttt{partner} into \texttt{parnter}, weakening that misleading cue enough to recover \emph{Sports}.
+Error examples saved across all three models illustrate how specific swapped words tip borderline articles:
+\begin{itemize}\setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}
+\item In \textit{Word TF-IDF LR} at just 5\% swaps, corrupting \texttt{hong kong} into \texttt{hong knog} inside a short political profile of Tung Chee-hwa breaks a strong \emph{World} geographic clue and tips the article into \emph{Business}, while swapping \texttt{technology} to \texttt{technolgoy} in an IT strategy book review lets financial wording tip \emph{Sci/Tech} into \emph{Business}.
+\item In \textit{Word CNN} at 5\% swaps, a stem-cell funding story shifts from \emph{Sci/Tech} to \emph{World} when a single edit turns \texttt{research} into \texttt{resaerch}, leaving surrounding political administration wording to dominate.
+\item In \textit{Subword CNN} at 20\% swaps, swapping \texttt{insurer} to \texttt{inusrer}, \texttt{disastrous} to \texttt{disasrtous}, and \texttt{pushed} to \texttt{pusehd} turns an Australian corporate report from \emph{Business} to \emph{World}, while swapping \texttt{surgeries} to \texttt{surgreies} flips a malpractice-insurance story from \emph{Business} to \emph{World}, and swapping \texttt{push} to \texttt{psuh} tips a wiretap item from \emph{Sci/Tech} to \emph{World}.
+\item On the other hand, a Honda Formula One story misread as \emph{Sci/Tech} on clean text corrupts \texttt{partner} into \texttt{parnter}, weakening the misleading automotive cue enough for \textit{Subword CNN} to recover \emph{Sports}.
 \end{itemize}
 
-As the Honda example shows, losing a phrase can sometimes fix a prior mistake, hiding intense churn beneath net accuracy (Figure~\ref{fig:paired-changes}). In clean-trained \textit{Word CNN}, out-of-vocabulary rates jump roughly fourfold under 10\% swaps (roughly halving again under noisy training). At 20\% test noise, both neural models flip almost 500 individual decisions between clean and corrupted text, more than double the linear baseline's 215 flips, and although subword chunks reduce new errors at 5\% and 10\% swaps, chance fixes flatten the single-run difference at 20\% and highlight why multi-run averaging matters.
+That final recovery example highlights why net accuracy hides heavy two-way churn (Figure~\ref{fig:paired-changes}). At 20\% swaps, \textit{Word TF-IDF LR} breaks 142 clean-correct articles while fixing 73 earlier errors (215 total flips behind its net drop of 69 articles). Both CNNs flip more than twice as many articles overall (492 flips in \textit{Word CNN} and 477 in \textit{Subword CNN}). Although \textit{Subword CNN} causes fewer newly broken predictions at 5\% and 10\% swaps (82 versus 118, and 153 versus 188), extra accidental fixes flatter \textit{Word CNN} on this single run at 20\%, underscoring why multi-run evaluation in Section~\ref{sec:swap-sensitivity} is essential.
 
-\begin{figure}[!htbp]
+\begin{figure}[tbp]
 \centering
-\includegraphics[width=.68\linewidth]{figures/paired_prediction_changes.pdf}
+\includegraphics[width=.50\linewidth]{figures/paired_prediction_changes.pdf}
 \caption[Paired prediction flips]{Paired prediction flips across all 7,600 official test articles for primary clean-trained models relative to 0\% swaps (brown marks broken predictions and green marks accidental fixes).}\label{fig:paired-changes}
 \end{figure}

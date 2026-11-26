@@ -1,29 +1,34 @@
 \chapter{Experimental design}\label{ch:experiments}
 
-\section{Selecting and tuning}
-We built the study in stages. After testing our data and corruption scripts on a small pilot subset, we ran an initial comparison between \textit{Word TF-IDF LR} and the eight-epoch \textit{Word CNN}. Because that neural run trailed noticeably behind the linear baseline, we screened several linear, character-aware, and pretrained candidates on the 4,000-article validation split using a combined validation score that averages Macro-F1 equally across clean and 10\%-swapped articles (Table~\ref{tab:explored-models}).
+\section{What we tried and tuned}
+Project development moved through staged validation and screening before locking final runs. After verifying preprocessing and swap generation on a pilot subset (2,000 training, 400 validation, and 400 test stories), we ran an initial multi-seed comparison between \textit{Word TF-IDF LR} and eight-epoch \textit{Word CNN}. Because the neural model trailed the linear baseline across all noise settings, we ran a systematic candidate exploration on the 4,000-article validation split using the combined clean and 10\%-swapped Macro-F1 validation score (Table~\ref{tab:explored-models}).
 
 \begin{table}[!htbp]
 \centering\small
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{37mm}>{\raggedright\arraybackslash}p{45mm}r>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{39mm}>{\raggedright\arraybackslash}p{45mm}r>{\raggedright\arraybackslash}X@{}}
 \toprule
-Candidate model & How it works in simple terms & Val. score (\%) & Role in main comparison \\
+Candidate model & How it works in simple terms & Val. score (\%) & Role in final study \\
 \midrule
-\textit{Word TF-IDF LR} & Weighted scores over single words and two-word pairs & 89.51 & Kept as fast, word-only linear baseline \\
-Word + char TF-IDF LR & Adds short letter slices to word weights & 89.75 & Omitted so baseline stays strictly word-only \\
-Interior-sorted TF-IDF LR & Alphabetizes middle letters to erase swaps & 89.77 & Omitted as a task-specific swap trick \\
-Frozen encoder + head & Uses external pretrained sentence vectors & 90.24 & Omitted so all models learn from scratch \\
-\textit{Word CNN} & Scans three-to-five-word phrase windows & 86.36 & Kept as word-only neural phrase detector \\
-\textit{Subword CNN} & Adds hashed letter pieces and LR decay & 87.20 & Kept as top neural model trained from scratch \\
+\textit{Word TF-IDF LR} & Weighted scores over single words and two-word pairs & 89.51 & Selected as our fast, word-only baseline \\
+Word TF-IDF Linear SVM & Margin-based linear classifier on word TF-IDF & 89.86 & Omitted to avoid duplicate linear baselines \\
+Word + char TF-IDF LR & Adds three-to-five-letter slices (0.5 weight) & 89.75 & Omitted so baseline stays strictly word-only \\
+Interior-sorted TF-IDF LR & Alphabetizes middle letters to cancel swaps & 89.77 & Explored control tailored to interior swaps \\
+Frozen BGE + neural head & Pinned pretrained vectors with tuned head & 90.24 & Excluded external pretraining from main three \\
+Hybrid word + char + BGE & Fuses lexical, character, and frozen BGE & 91.27 & Upper-bound fusion check (91.88\% clean test) \\
+\textit{Word CNN} & Word vectors and three-to-five-word convs (8 epochs) & 86.36 & Selected as word-level neural phrase model \\
+\textit{Scheduled Word CNN} & Same word CNN stretched to 16 epochs + decay & 86.68 & Schedule-matched control against subwords \\
+\textit{Subword CNN} & Adds hashed letter pieces (16 epochs + decay) & 87.20 & Selected as top neural model from scratch \\
 \bottomrule
 \end{tabularx}
-\caption[Explored and selected models]{Candidate variations screened on the 4,000-article validation split (averaging clean and augmented validation scores), showing why the main comparison focuses on \textit{Word TF-IDF LR}, \textit{Word CNN}, and \textit{Subword CNN}.}
+\caption[Explored and selected models]{Candidate variations screened on the 4,000-article validation split (averaging clean and augmented validation scores), summarizing both our wider exploratory checks and our three main scratch-trained models.}
 \label{tab:explored-models}
 \end{table}
 
-Each omitted option served as a diagnostic check rather than a fair main competitor. Adding character slices to TF-IDF helped slightly, so we kept our linear baseline strictly word-based to isolate character effects inside the neural models. Alphabetizing middle letters cancels synthetic swaps automatically instead of handling realistic noise, and a linear support vector machine behaved almost identically to logistic regression (scoring just under 90\% on validation). Using frozen vectors from a pretrained language model scored highest at just over 90\%, though keeping our main comparison strictly trained from scratch on 20,000 news articles puts all three core models on equal footing.
+Each explored variant taught a clear lesson about what helps on noisy news text. Swapping logistic regression for a linear support vector machine (\texttt{LinearSVC}) or adding character n-grams pushed validation up slightly, reaching 90.68\% and 90.50\% on clean official test articles (and 89.79\% and 89.47\% at 20\% swaps). Sorting every word's middle letters alphabetically (the interior-sorted control) erased our synthetic swap perturbation completely, scoring an exact invariant 90.09\% across both 0\% and 20\% test noise, yet collapsing interior order merges valid anagrams across 237 training word groups (representing 3.14\% of training tokens) and fails against insertions or deletions.
 
-Inside the main study, tuning regularization for the linear baseline chose a stronger penalty on clean training and a slightly looser penalty under noisy training (Table~\ref{tab:lr-validation}). For the neural models, early stopping saved the checkpoint peaking highest on the combined validation score before overfitting set in (Table~\ref{tab:chosen-epochs} and Figure~\ref{fig:learning}). We also checked a 16-epoch version of the word-only network (\textit{Scheduled Word CNN} in Figure~\ref{fig:learning}), seeing that \textit{Subword CNN} still led throughout early epochs before learning-rate halving began.
+We also tested dense representations from a frozen pretrained transformer, \texttt{BAAI/bge-small-en-v1.5} \citep{bgesmall}. The 384-dimensional sentence encoder was kept completely frozen and queried without label access to cache document vectors, training only a lightweight neural classifier head (dropout 0.2, learning rate 0.003) or linear layer on top. That tuned pretrained head reached 90.63\% clean test accuracy (89.50\% at 20\% swaps), and fusing lexical, character, and frozen BGE features into a hybrid classifier achieved the highest overall scores in our exploratory suite at 91.88\% clean test accuracy (rising to 92.04\% with an SVM classifier, and staying above 90.9\% under 20\% swaps). Because pretraining overlap between \texttt{BAAI/bge-small-en-v1.5} and AG News is unknown and feature extraction adds roughly 47 minutes of upstream CPU cost, we excluded pretrained encoders and task-specific tricks from our main comparison so all primary models learn strictly from our 20,000 articles from scratch.
+
+Inside those three main models, validation tuning picked $C = 2.0$ for clean \textit{Word TF-IDF LR} and a looser $C = 8.0$ across every augmented run (Table~\ref{tab:lr-validation}). Across neural development runs (Table~\ref{tab:chosen-epochs} and Figure~\ref{fig:learning}), training cross-entropy dropped steadily to the final pass (from roughly 1.27 at epoch 1 down to 0.23 at epoch 8 in \textit{Word CNN} and under 0.07 by epoch 16 in \textit{Subword CNN}), while validation Macro-F1 peaked early at epoch 7 for \textit{Word CNN} and epochs 11 to 12 for \textit{Subword CNN}. Importantly, \textit{Subword CNN} led \textit{Scheduled Word CNN} throughout epochs 2 to 8 before any learning-rate halving began, promoting it into the full three-seed comparison while retaining \textit{Scheduled Word CNN} as a schedule ablation control (Appendix~\ref{app:decisions}).
 
 \begin{table}[!htbp]
 \centering\small
@@ -41,11 +46,11 @@ $C = 8.0$ & 89.53 & \textbf{89.39} \\
 \end{table}
 
 \input{tables/chosen_epochs}
-\begin{figure}[!htbp]\centering\includegraphics[width=.62\linewidth]{figures/cnn_learning.pdf}
+\begin{figure}[!htbp]\centering\includegraphics[width=.54\linewidth]{figures/cnn_learning.pdf}
 \caption[CNN learning curves]{Combined validation score by epoch (left) and training cross-entropy loss (right) in our primary development run under clean (top) and augmented (bottom) training. \textit{Scheduled Word CNN} matches \textit{Word CNN} through epoch 8.}\label{fig:learning}\end{figure}
 
-\section{Splits and runtime}
-Once those recipes were fixed, we froze all settings before scoring untouched confirmation articles and running the final three-run test sweeps. Each experiment isolates one change at a time across our four evaluation sets (Table~\ref{tab:evaluation-coverage}), using separate fixed random streams for splitting, swaps, and model initialization (archived in Appendices~\ref{app:decisions} and~\ref{app:repro}) so augmented models inside a run train on identical noisy stories.
+\section{Splits and computing cost}
+After screening, we froze all model recipes and tuning rules before evaluating untouched confirmation articles and completing three-run test evaluations. Every comparison isolates a single manipulated factor across four evaluation partitions (Table~\ref{tab:evaluation-coverage}), using separate fixed random streams for dataset splitting, typo corruption, and three independent training runs per model (exact seeds are recorded in Appendices~\ref{app:decisions} and~\ref{app:repro}). Keeping validation, test, and confirmation texts strictly untouched during training guarantees that augmented models within a given seed share identical corrupted inputs.
 
 \begin{table}[!htbp]
 \centering\small
@@ -54,21 +59,20 @@ Once those recipes were fixed, we froze all settings before scoring untouched co
 Evaluation split & Swap targets & Models evaluated & Role in study \\
 \midrule
 Validation ($N = 4{,}000$) & 0\%, 10\% & Baseline $C$ grid, neural epochs, candidate models & Select $C$, checkpoints, and three main models \\
-\addlinespace[2pt]
+\addlinespace[1pt]
 Official test ($N = 7{,}600$) & 0\%, 5\%, 10\%, 20\% & Three main models across 3 runs and both arms & Primary evaluation for Investigations 1 and 2 \\
-\addlinespace[2pt]
+\addlinespace[1pt]
 Confirmation ($N = 4{,}000$) & 0\%, 10\% & Frozen primary-run models in both arms & Post-freeze check on untouched AG News articles \\
-\addlinespace[2pt]
+\addlinespace[1pt]
 Extra swap draws ($N = 7{,}600$) & 20\% (2 extra sets) & All 18 saved fits across 3 runs and both arms & Check if 20\%-swap rankings hold across fresh typo sets \\
 \bottomrule
 \end{tabularx}
 \caption[Evaluation splits and runs]{Summary of evaluation splits, typo targets, evaluated models, and study roles.}
 \label{tab:evaluation-coverage}
 \end{table}
-\FloatBarrier
 
-Clean linear fitting is completely deterministic, while noisy and neural setups average three runs (per-run tables and standard deviations appear in Appendix~\ref{app:decisions}). Alongside headline accuracy and per-topic $F_1$, we measure test-set sampling uncertainty with 95\% paired bootstrap intervals built by resampling test stories 2,000 times within each topic.
+Clean-trained \textit{Word TF-IDF LR} is deterministic, while augmented and neural results average three runs with sample standard deviations archived in Appendix~\ref{app:decisions}. To quantify test-set sampling uncertainty around paired differences between models or training arms, we compute pointwise 95\% confidence intervals via 2,000 class-stratified article bootstrap resamples holding fitted weights and swap draws fixed.
 
-We also track runtime on a four-thread CPU machine without GPU acceleration (Table~\ref{tab:fit-cost-review}). \textit{Word TF-IDF LR} tunes all regularization candidates in roughly 13 seconds, compared with nearly four minutes for \textit{Word CNN} and nearly eleven minutes for \textit{Subword CNN}.
+We measured training cost on a Windows 11 workstation powered by an AMD Ryzen 3 4300U processor using four CPU threads without GPU acceleration (Table~\ref{tab:fit-cost-review}). \textit{Word TF-IDF LR} vectorizes texts and tunes regularization in a median of 13 seconds, compared with 219 seconds (nearly four minutes) for \textit{Word CNN} and 642 seconds (nearly eleven minutes) for \textit{Subword CNN}. Note that standalone fit columns reflect frozen-recipe runs and exclude prior candidate searches or shared BGE encoding caches reported separately above.
 
 \input{tables/fit-cost-review}
