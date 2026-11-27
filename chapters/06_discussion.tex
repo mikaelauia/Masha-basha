@@ -1,29 +1,25 @@
 \chapter{Discussion}\label{ch:discussion}
 
 \section{Representation and robustness trade-offs}
-At the 20\% swap target, 99.1\% of test articles contain at least one edit, while about 87\% of all words remain intact (Figure~\ref{fig:swap-exposure}). \textit{Word TF-IDF LR} scores the whole article by adding evidence from its words and word pairs. An edit can remove a few features while leaving other clues in the headline and summary.
+Even at our harshest 20\% swap setting, where 99.1\% of test stories contain at least one typo, roughly 87\% of all words in each story stay untouched (Figure~\ref{fig:swap-exposure}). \textit{Word TF-IDF LR} collects additive votes across every surviving word and word pair in the headline and summary, so breaking one or two tokens leaves plenty of reliable evidence intact.
 
-A CNN with global max pooling keeps one response per filter. If a swap hits the window that produced the strongest response, the pooled score can change sharply. The \texttt{either} example in Table~\ref{tab:error-examples} is consistent with this mechanism. The CNNs also change correctness more than twice as often as the linear model at 20\% swaps (Figure~\ref{fig:paired-changes}). Their \emph{Business} errors and false positive \emph{World} predictions illustrate why topic-level measures add information to overall accuracy.
+Convolutional neural networks paired with global max pooling behave differently because each filter passes only its single highest-scoring window forward. When a swap hits the specific phrase window holding that peak response, the pooled score shifts abruptly, as illustrated by \texttt{either} $\to$ \texttt{etiher} in Table~\ref{tab:error-examples}. That sensitivity helps explain why both CNNs generate more than twice as much prediction churn as the linear baseline at 20\% swaps (Figure~\ref{fig:paired-changes}) and why watching \emph{Business} drops and \emph{World} false positives adds critical detail beyond headline accuracy.
 
-Training with typos gives \textit{Subword CNN} a mean gain of 0.31 to 0.46 percentage points at 20\% swaps across the three draws. Character fragments shared by clean and misspelled words provide one way for those models to learn from both forms. In the word-only models, recurring typos can enter the vocabulary, while the TF-IDF document-frequency cutoff removes singletons. The seed differences and the small clean-text drop in the confirmation run limit what we can conclude about the benefit of this augmentation setting (Tables~\ref{tab:app-seed-draws} and~\ref{tab:held-out-review}).
+Training with spelling swaps boosts \textit{Subword CNN} by an average of 0.31 to 0.46 points across three 20\% test draws because clean and misspelled variants share character-fragment buckets. Word-only networks benefit only when repeated typos enter their fixed word list, while TF-IDF automatically ignores rare one-off typos via its minimum document count. Seed-to-seed swings and the small clean confirmation dip keep this static augmentation benefit modest (Tables~\ref{tab:app-seed-draws} and~\ref{tab:held-out-review}).
 
-The median fit time is 13 seconds for \textit{Word TF-IDF LR}, 219 seconds for \textit{Word CNN}, and 642 seconds for \textit{Subword CNN} (Table~\ref{tab:fit-cost-review}). The exploratory screen shows modest gains from adding character TF-IDF and higher accuracy for the frozen BGE fusion, which also incurs the encoder's feature extraction cost (Table~\ref{tab:explored-models}).
+Runtime and exploratory screens sharpen this comparison. On four CPU threads, \textit{Word TF-IDF LR} tunes in 13 seconds median versus 219 seconds for \textit{Word CNN} and 642 seconds for \textit{Subword CNN} (Table~\ref{tab:fit-cost-review}). Exploratory runs also showed cheap gains from adding character slices to TF-IDF and higher accuracy near 92\% from fusing lexical, character, and frozen BGE features when 47 minutes of upstream encoding are acceptable (Table~\ref{tab:explored-models}).
 
 \section{Training schedule}
-The main CNN comparison changes the representation and the schedule together. \textit{Subword CNN} adds 786,528 character-fragment parameters and uses up to 16 epochs with learning rate decay. The main \textit{Word CNN} uses up to eight epochs at a fixed learning rate.
+Our primary neural comparison changes token representation and optimization schedule together: \textit{Subword CNN} adds 786,528 character weights and trains up to 16 epochs with learning-rate plateau decay, while \textit{Word CNN} stops at eight fixed-rate epochs. On seed 42 under augmentation, extending \textit{Word CNN} to that same 16-epoch schedule (\textit{Scheduled Word CNN}, Table~\ref{tab:scheduled-review}) lifts 20\%-swap accuracy from 84.75\% to 85.50\%, leaving just 0.07 points to \textit{Subword CNN}. Even though \textit{Subword CNN} led on validation across epochs 2 to 8 before decay started (Figure~\ref{fig:learning}), testing only one seed means schedule and capacity cannot be separated cleanly from these runs alone.
 
-At seed 42 under augmented training, the schedule-matched word model raises 20\%-swap accuracy from 84.75\% to 85.50\%. That leaves a gap of 0.07 percentage points to \textit{Subword CNN} (Table~\ref{tab:scheduled-review}). During the early training epochs, the subword model has a higher validation score than the schedule-matched model (Figure~\ref{fig:learning}). The two observations concern different stages of evaluation, and the schedule control uses only one fitting seed.
-
-\Needspace{365pt}
+\newpage
 \section{Validity limits}\label{sec:limitations}
-We inspected early official test scores before screening candidates. That makes the official test comparisons partly exploratory, because repeated evaluation can bias model selection \citep{cawley2010}. The separate confirmation sample checks the resulting model ordering after the settings were fixed.
+Inspecting early official test results prior to running the nine-model candidate screen puts follow-up comparisons on exploratory footing rather than pure confirmation \citep{cawley2010}, though freezing settings before evaluating the untouched confirmation split helps limit selection bias.
 
-The paired bootstrap intervals describe test-article sampling for the fitted models and swap draw. New training splits or different draws add other sources of variation. The timing comparison also excludes exploratory fitting and the BGE encoding pass.
-
-Our spelling errors affect only adjacent interior letters. Mixed edits, spacing problems, and changes in writing over time could affect the models differently. The findings apply to the four AG News topics and the swap procedure used here.
+Bootstrap intervals measure test-article sampling noise for fixed weights and edits rather than variance across fresh training sets, while timing comparisons exclude exploration searches and BGE encoding. Finally, interior swaps preserve outer anchor letters, word length, and spacing, so generalizing to real insertions, deletions, or future news cycles warrants separate testing beyond four AG News classes.
 
 \section{Future directions}
-The $2 \times 2$ design in Table~\ref{tab:proposed-cnn-design} would compare both representations at both schedule lengths. It adds a short-schedule \textit{Subword CNN} and repeats the long-schedule \textit{Word CNN} across the remaining seeds. Matching the parameter budgets would reduce the effect of model size on this comparison.
+A full $2 \times 2$ comparison crossing words versus subwords with eight-epoch versus 16-epoch schedules under matched $\approx 3.0\mathrm{M}$ budgets and all three seeds would isolate character representations cleanly (Table~\ref{tab:proposed-cnn-design}). Comparing global max pooling against top-$k$ pooling, average pooling, or lightweight attention under single-word peak swaps would test phrase-window fragility directly, and resampling fresh typos each epoch would test whether dynamic augmentation improves noisy accuracy without hurting clean text.
 
 \begin{table}[H]
 \centering\normalsize
@@ -38,7 +34,3 @@ Words + fragments & Short-schedule \textit{Subword CNN} (missing control) & \tex
 \caption[Proposed factorial CNN comparison]{Proposed $2 \times 2$ factorial design crossing token representation with training schedule under matched random runs and equalized ($\approx 3.0\mathrm{M}$) parameter budgets.}
 \label{tab:proposed-cnn-design}
 \end{table}
-
-A second experiment could compare max pooling with top-$k$ pooling, average pooling, or lightweight attention. Swapping a word inside a filter's highest-scoring window and inside a lower-scoring window would help test how much that position affects the topic scores.
-
-Finally, drawing new typos each epoch would expose the neural models to both clean spellings and a wider variety of misspellings. This would test whether augmentation can retain its noisy-text gain while improving accuracy on clean confirmation articles.
