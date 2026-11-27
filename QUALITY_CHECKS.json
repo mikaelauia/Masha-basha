@@ -1,5 +1,5 @@
 {
-  "revision": "Research questions, layout, figures, and reference audit",
+  "revision": "Page-flow refinement",
   "chapter_revised": 7,
   "swap_draw_aug_gains_verified": 9,
   "net_correct_by_topic_verified": 12,
@@ -31,9 +31,9 @@
   "overfull_boxes": 0,
   "undefined_references": 0,
   "missing_characters": 0,
-  "visual_review": "Rendered the complete Tectonic and BibTeX build. Inspected page breaks, tables, figure labels, and the front matter.",
-  "report_pdf_sha256": "6e5560a31312785c36fb3099aadb4e011f06942956b6d550c2a40d1568fd34c3",
+  "visual_review": "Inspected the 27-page build, including the revised placement in Methodology, Experimental design, and Results.",
+  "report_pdf_sha256": "48715710e2d8b1f58b243074987ed6ac6f440afa08a32e690fc2922420751abf",
   "held_out_augmentation_contrasts_verified": 2,
   "pdf_pages_total": 27,
-  "text_audit": "Verified 64 cross-reference uses, all 17 bibliography entries, and 155 named link destinations in the compiled PDF."
+  "text_audit": "Verified the bibliography, link destinations, table contents, and unchanged numbering and page listings."
 }
