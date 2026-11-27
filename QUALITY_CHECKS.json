@@ -1,5 +1,5 @@
 {
-  "revision": "Conciseness and page-break revision",
+  "revision": "Research questions, layout, figures, and reference audit",
   "chapter_revised": 7,
   "swap_draw_aug_gains_verified": 9,
   "net_correct_by_topic_verified": 12,
@@ -26,16 +26,14 @@
   "held_out_accuracy_values_verified": 12,
   "class_level_counts_verified": 8,
   "evidence_extracts_hash_checked": 14,
-  "bibliography_keys_checked": 14,
+  "bibliography_keys_checked": 17,
   "compiled_successfully": true,
   "overfull_boxes": 0,
   "undefined_references": 0,
   "missing_characters": 0,
-  "visual_review": "Rendered with pdfLaTeX+BibTeX; contents and lists each fit one page; no solitary-float or few-line spillover pages.",
-  "report_pdf_sha256": "402645a07bd922b4cb39ca015cc76a5da35e4b8786e9c3932ff799c39d948774",
-  "standalone_zip_compile_verified": true,
-  "standalone_zip_pdf_text_matches_exported_pdf": true,
+  "visual_review": "Rendered the complete Tectonic and BibTeX build. Inspected page breaks, tables, figure labels, and the front matter.",
+  "report_pdf_sha256": "6e5560a31312785c36fb3099aadb4e011f06942956b6d550c2a40d1568fd34c3",
   "held_out_augmentation_contrasts_verified": 2,
-  "pdf_pages_total": 34,
-  "text_audit": "Scripted scan for duplicate words, spacing, dashes, undefined refs/cites: clean. Key metrics re-verified against saved results."
+  "pdf_pages_total": 27,
+  "text_audit": "Verified 64 cross-reference uses, all 17 bibliography entries, and 155 named link destinations in the compiled PDF."
 }
