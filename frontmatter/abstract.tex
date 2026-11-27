@@ -2,7 +2,7 @@
 \addcontentsline{toc}{chapter}{Abstract}
 We study how spelling errors affect four-topic classification on AG News. The errors swap adjacent interior letters inside eligible words and preserve word length and boundaries. With 20,000 labeled training articles, we compare a word and bigram TF-IDF baseline (\textit{Word TF-IDF LR}) with \textit{Word CNN} and \textit{Subword CNN}. We evaluate clean-text accuracy and accuracy at swap targets up to 20\%. We also test whether replacing half of each topic's training articles with copies edited at the 10\% target improves performance on noisy text.
 
-\textit{Word TF-IDF LR} is the most accurate of the three main models at every swap target. With clean training, its accuracy falls from 90.05\% on clean text to 89.14\% at 20\% swaps. Its median CPU fit time is 13 seconds. The two CNNs fall by about two percentage points, with most of the primary fits' net losses in \emph{Business}.
+\textit{Word TF-IDF LR} is the most accurate of the three main models at every swap target. With clean training, its accuracy falls from 90.05\% on clean text to 89.14\% at 20\% swaps. Its median CPU fit time is 13 seconds. The two CNNs fall by about two percentage points, with about 90\% of the seed-42 clean-trained net losses in \emph{Business}.
 
 Training with typos improves \textit{Subword CNN} accuracy by 0.31 to 0.46 percentage points on average across the three 20\% draws. Individual runs vary, and the separate confirmation sample shows a small drop on clean text. A 16-epoch word-only control at seed 42 closes most of the gap between the augmented CNNs at 20\% swaps.
 

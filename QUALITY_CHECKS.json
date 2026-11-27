@@ -1,5 +1,5 @@
 {
-  "revision": "Research questions, layout, figures, and reference audit",
+  "revision": "Fact-check against IKT466_Next_Chat_Context.zip and clarity pass",
   "chapter_revised": 7,
   "swap_draw_aug_gains_verified": 9,
   "net_correct_by_topic_verified": 12,
@@ -32,7 +32,7 @@
   "undefined_references": 0,
   "missing_characters": 0,
   "visual_review": "Rendered the complete Tectonic and BibTeX build. Inspected page breaks, tables, figure labels, and the front matter.",
-  "report_pdf_sha256": "e4cf62ab30310f0931e4f9df9c3adb971f8f521518d5d2f72e82e7449b975567",
+  "report_pdf_sha256": "35405c50555390be12b86b47a6c03ab1cde10747d6342a4add237b8d5cbdf51a",
   "held_out_augmentation_contrasts_verified": 2,
   "pdf_pages_total": 26,
   "text_audit": "Verified 64 cross-reference uses, all 17 bibliography entries, and 155 named link destinations in the compiled PDF."

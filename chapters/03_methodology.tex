@@ -32,7 +32,7 @@ Source corpus & AG News CSV mirror, \texttt{torchtext} checksums (120,000 train,
 Text normalization & Join title and description, lowercase, \artifact{[a-z]+}, cap at 128 tokens \\
 Deduplication audit & Remove 38 test matches, 79 conflicts, 326 dups (119,557 kept) \\
 Stratified budgets & 20,000 train, 4,000 val, 4,000 confirmation (4 classes), 7,600 test \\
-Length truncation impact & Caps 18 of 120,000 train rows and 5 of 7,600 test rows \\
+Length truncation impact & Caps 18 of 20,000 selected train rows (106 of 120,000 raw), 2 of 4,000 val, 3 of 4,000 confirmation, and 5 of 7,600 test rows \\
 Test swap targets & Deterministic adjacent interior swap at 0\%, 5\%, 10\%, and 20\% \\
 Static train augmentation & Replace 50\% per topic (10,000 rows) once at 10\% swaps \\
 \bottomrule
@@ -68,7 +68,7 @@ Validation and confirmation use clean and 10\%-swapped inputs, main testing swee
 \label{fig:swap-exposure}
 \end{figure}
 
-Both training arms consume 20,000 articles. The clean arm uses unmodified normalized articles, while the augmented arm samples 50\% of each topic once per run without replacement (10,000 stories total) and replaces them with 10\%-swapped copies before training, editing roughly 9,100 articles and 3.2\% of training words (24,791 tokens on the primary run).
+Both training arms consume 20,000 articles. The clean arm uses unmodified normalized articles, while the augmented arm samples 50\% of each topic once per run without replacement (10,000 stories total) and replaces them with 10\%-swapped copies before training, editing roughly 9,100 articles and 3.2\% of training words (24,791 tokens on the primary seed-42 run).
 
 \section{Model architectures}\label{sec:models}
 All three classifiers consume identical normalized text and output four topic logits using only parameters learned from the active 20,000-article training set (Figure~\ref{fig:model-flow} and Table~\ref{tab:model-tech-summary}).
@@ -100,7 +100,7 @@ Training schedule & L-BFGS (\texttt{max\_iter=1000}) & AdamW, up to 8 epochs (pa
 The linear baseline tokenizes on spaces and retains up to 50,000 unigrams and bigrams occurring in at least two training articles. Dropping single-occurrence terms automatically ignores rare one-off typos generated during noisy training, fitting 200,004 linear weights and class intercepts across four topics.
 
 \subsection{Word CNN}
-\textit{Word CNN} keeps the 29,998 most common training words at IDs 2 through 29,999, assigning index 0 to zero padding and index 1 to the unknown-word token (\texttt{<unk>}). During augmented training, repeated typos can enter this dictionary (matching 60.9\% of swapped tokens in the primary augmented validation pass). Articles pad to 128 positions of 96-dimensional embeddings drawn from $\mathcal{N}(0,1)$, then feed three parallel 1D convolution layers (64 filters each at kernel widths three, four, and five) with ReLU activations (Figure~\ref{fig:word-cnn-forward}).
+\textit{Word CNN} keeps the 29,998 most common training words at IDs 2 through 29,999, assigning index 0 to zero padding and index 1 to the unknown-word token (\texttt{<unk>}). During augmented training, repeated typos can enter this dictionary (matching 60.1\% of swapped tokens in the seed-42 augmented validation pass, versus 1.7\% cleanly, and 60.9\% on the 10\% and 20\% official test views). Articles pad to 128 positions of 96-dimensional embeddings drawn from $\mathcal{N}(0,1)$, then feed three parallel 1D convolution layers (64 filters each at kernel widths three, four, and five) with ReLU activations (Figure~\ref{fig:word-cnn-forward}).
 
 \begin{figure}[H]\centering
 \includegraphics[width=.82\linewidth]{figures/word_cnn_forward.pdf}
@@ -134,7 +134,7 @@ Both CNNs minimize mean cross-entropy over batches of $B = 128$ shuffled article
 \begin{equation}
 L = -\frac{1}{B}\sum_{i=1}^{B} \log \frac{\exp(z_{i, y_i})}{\sum_{j=1}^{4}\exp(z_{i,j})}.
 \end{equation}
-\textit{Word CNN} runs up to 8 epochs (patience 2, fixed rate), while \textit{Subword CNN} runs up to 16 epochs (patience 4) with \texttt{ReduceLROnPlateau} halving the rate after two stalled epochs, updating checkpoints only above $10^{-6}$ gain.
+Both CNNs save a new best checkpoint only when the validation objective improves by more than $10^{-6}$. \textit{Word CNN} runs up to 8 epochs (patience 2, fixed rate), while \textit{Subword CNN} runs up to 16 epochs (patience 4) with \texttt{ReduceLROnPlateau} (\texttt{patience=1}, \texttt{factor=0.5}), halving the learning rate after two consecutive non-improving epochs.
 
 Performance is evaluated by overall accuracy alongside four-class Macro-F1 from topic precision $P_k$ and recall $R_k$:
 \begin{equation}

@@ -55,16 +55,16 @@ Scoring all 18 saved checkpoints across two more independent 20\% test draws con
 
 Individual article predictions vary more than split averages hide. Across the three 20\% draws, fixed clean models flip topics on 6.1\% of articles for \textit{Word TF-IDF LR}, versus 11.8\% for \textit{Word CNN} and 11.3\% for \textit{Subword CNN}. On official test article 0 (Section~\ref{sec:models}), clean \textit{Subword CNN} predicts \emph{World} twice and \emph{Business} once across the three draws, while the linear baseline predicts \emph{Business} every time.
 
-Evaluating frozen primary runs on the 4,000-article confirmation sample preserves every model ranking inside both training arms (Table~\ref{tab:held-out-review}). At 10\% swaps, \textit{Word TF-IDF LR} stays ahead in both arms, while augmented \textit{Subword CNN} reaches 86.75\%, leading augmented \textit{Word CNN} by 1.30 points and clean \textit{Subword CNN} by 0.60 points. On clean confirmation articles, augmentation dips 0.45 points before rounding in \textit{Subword CNN} (88.12\% down to 87.68\%), confirming a small clean-text trade-off.
+Evaluating frozen seed-42 runs on the 4,000-article confirmation sample preserves every model ranking inside both training arms (Table~\ref{tab:held-out-review}). At 10\% swaps, \textit{Word TF-IDF LR} stays ahead in both arms, while augmented \textit{Subword CNN} reaches 86.75\%, leading augmented \textit{Word CNN} by 1.30 points and clean \textit{Subword CNN} by 0.60 points. On clean confirmation articles, augmentation dips 0.45 points before rounding in \textit{Subword CNN} (88.12\% down to 87.68\%), confirming a small clean-text trade-off.
 
 \input{tables/held-out-review}
 
 \section{Topic errors and flips}\label{sec:error-analysis}
-Inspecting per-topic $F_1$ and net prediction counts across primary clean-trained runs shows where errors gather (Tables~\ref{tab:topic-f1} and~\ref{tab:confusion-review}). \emph{Sports} stays above 90\% $F_1$ everywhere even at 20\% swaps thanks to concentrated player and team names, while \emph{Business} drops lowest in both CNNs. Between 0\% and 20\% swaps, \emph{Business} absorbs nearly 90\% of each CNN's net losses, dropping 172 articles in \textit{Word CNN} and 181 in \textit{Subword CNN} compared with 28 in \textit{Word TF-IDF LR} (out of total net drops of 190, 201, and 69 articles across the four classes, with \emph{Sports} losing 61, 50, and 16 and \emph{Sci/Tech} shifting $+15$, $-1$, and $-14$).
+Inspecting per-topic $F_1$ and net prediction counts across seed-42 clean-trained runs shows where errors gather (Tables~\ref{tab:topic-f1} and~\ref{tab:confusion-review}). \emph{Sports} stays above 90\% $F_1$ everywhere even at 20\% swaps thanks to concentrated player and team names, while \emph{Business} drops lowest in both CNNs. Between 0\% and 20\% swaps, \emph{Business} absorbs about 90\% of each CNN's net losses, dropping 172 articles in \textit{Word CNN} and 181 in \textit{Subword CNN} compared with 28 in \textit{Word TF-IDF LR} (out of total net drops of 190, 201, and 69 articles across the four classes, with \emph{Sports} losing 61, 50, and 16 and \emph{Sci/Tech} shifting $+15$, $-1$, and $-14$).
 
 \input{tables/topic-f1}
 
-Surprisingly, true \emph{World} detections rise slightly in both CNNs at 20\% swaps ($+28$ and $+31$ articles versus $-11$ in linear), even as \emph{World} $F_1$ falls roughly three points because ambiguous items spill heavily into \emph{World}. In \textit{Subword CNN}, false-positive \emph{World} predictions jump from 215 to 399, driven by 187 true \emph{Business} items mislabeled as \emph{World} and 320 sent to \emph{Sci/Tech} (up from 92 and 239 cleanly, Table~\ref{tab:confusion-review}).
+Surprisingly, true \emph{World} detections rise slightly in both CNNs at 20\% swaps ($+28$ and $+31$ articles versus $-11$ in linear), even as \emph{World} $F_1$ falls roughly three points because ambiguous items spill heavily into \emph{World}. In \textit{Subword CNN}, false-positive \emph{World} predictions jump from 215 to 399 (with true \emph{Business} items mislabeled as \emph{World} rising from 92 to 187, \emph{Sports} from 52 to 102, and \emph{Sci/Tech} from 71 to 110), while \emph{Business}-to-\emph{Sci/Tech} confusions also rise from 239 to 320 (Table~\ref{tab:confusion-review}).
 
 \input{tables/confusion-review}
 
@@ -74,7 +74,7 @@ Table~\ref{tab:error-examples} showcases specific clean-trained flips. In \texti
 
 \begin{table}[H]
 \centering\small\setlength{\tabcolsep}{3.5pt}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{16mm}>{\raggedright\arraybackslash}p{29mm}>{\raggedright\arraybackslash}p{28mm}>{\raggedright\arraybackslash}p{32mm}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{18mm}>{\raggedright\arraybackslash}p{29mm}>{\raggedright\arraybackslash}p{28mm}>{\raggedright\arraybackslash}p{31mm}>{\raggedright\arraybackslash}X@{}}
 \toprule
 Article ID & Clean-trained model (noise) & Class shift & Observed swap(s) & Brief context \\
 \midrule
@@ -84,18 +84,18 @@ Article ID & Clean-trained model (noise) & Class shift & Observed swap(s) & Brie
 \texttt{test:74} & \textit{Word CNN} (5\%) & \emph{Sci/Tech} $\to$ \emph{World} & \texttt{resaerch} (\texttt{research}) & Stem-cell funding policy dispute \\
 \texttt{test:415} & \textit{Word CNN} (5\%) & \emph{Sports} $\to$ \emph{Sci/Tech} & \texttt{etiher} (\texttt{either}) & Function word inside Hamm column \\
 \texttt{test:239} & \textit{Subword CNN} (5\%) & \emph{Business} $\to$ \emph{Sci/Tech} & \texttt{makret} (\texttt{market}) & Google Nasdaq market debut \\
-20\% cluster & \textit{Subword CNN} (20\%) & \emph{Business} / \emph{Sci/Tech} $\to$ \emph{World} & \texttt{inusrer}, \texttt{surgreies}, \texttt{psuh} & Insurer loss, malpractice, wiretap \\
-Honda F1 & \textit{Subword CNN} (20\%) & \emph{Sci/Tech} $\to$ \emph{Sports} (fix) & \texttt{parnter} (\texttt{partner}) & Formula One story about Honda \\
+\texttt{test:217}, \texttt{2444}, \texttt{453} & \textit{Subword CNN} (5--20\%) & \emph{Business} / \emph{Sci/Tech} $\to$ \emph{World} & \texttt{disasrtous}, \texttt{inusrer}, \texttt{surgreies}, \texttt{psuh} & Insurer rebound, malpractice, wiretap \\
+\texttt{test:6004} & \textit{Subword CNN} (10--20\%) & \emph{Sci/Tech} $\to$ \emph{Sports} (fix) & \texttt{parnter} (\texttt{partner}) & BAR Honda Formula One takeover \\
 \bottomrule
 \end{tabularx}
-\caption[Concrete article error examples]{Representative prediction flips observed under clean training at 5\% and 20\% test noise.}
+\caption[Concrete article error examples]{Representative seed-42 clean-trained flips at 5\%, 10\%, and 20\% noise (\texttt{test:217}/\texttt{2444}/\texttt{453} flip from 5\%, adding \texttt{inusrer} at 20\%; \texttt{test:6004} fixes from 10\%).}
 \label{tab:error-examples}
 \end{table}
 
-Sometimes noise helps by accident: in a Honda Formula One article, swapping \texttt{partner} to \texttt{parnter} weakens an automotive distraction enough to recover \emph{Sports}. Figure~\ref{fig:paired-changes} tracks both directions of article-level flip churn across 7,600 test stories. At 20\% swaps, \textit{Word TF-IDF LR} breaks 142 clean-correct articles while fixing 73 mistakes (215 total flips), compared with 492 total flips in \textit{Word CNN} and 477 in \textit{Subword CNN}. Across 5\% and 10\% noise, \textit{Subword CNN} breaks fewer clean predictions than \textit{Word CNN} (82 versus 118, and 153 versus 188).
+Sometimes noise helps by accident: in \texttt{test:6004} (a BAR Honda Formula One story), swapping \texttt{partner} to \texttt{parnter} at 10\% and 20\% noise weakens an automotive distraction enough to recover \emph{Sports}. Figure~\ref{fig:paired-changes} tracks both directions of article-level flip churn across 7,600 test stories. At 20\% swaps, \textit{Word TF-IDF LR} breaks 142 clean-correct articles while fixing 73 mistakes (215 total flips), compared with 492 total flips in \textit{Word CNN} and 477 in \textit{Subword CNN}. Across 5\% and 10\% noise, \textit{Subword CNN} breaks fewer clean predictions than \textit{Word CNN} (82 versus 118, and 153 versus 188).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.88\linewidth]{figures/paired_prediction_changes.pdf}
-\caption[Paired changes in correctness]{Changes from correct to wrong and from wrong to correct on the 7,600 official test articles, relative to 0\% swaps. All three primary fits use clean training.}\label{fig:paired-changes}
+\includegraphics[width=.82\linewidth]{figures/paired_prediction_changes.pdf}
+\caption[Paired changes in correctness]{Changes from correct to wrong and from wrong to correct on the 7,600 official test articles, relative to 0\% swaps. All three seed-42 fits use clean training.}\label{fig:paired-changes}
 \end{figure}

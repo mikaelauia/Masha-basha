@@ -3,7 +3,7 @@
 \section{Iterative model exploration}
 An initial pilot used 2,000 training, 400 validation, and 400 test articles to verify preprocessing, deterministic swaps, and prediction replay. In our first full comparison, eight-epoch \textit{Word CNN} trailed \textit{Word TF-IDF LR} across every noise setting.
 
-Before locking the main three-seed evaluation, we screened nine candidate variations using the unweighted mean of clean and 10\%-swapped validation Macro-F1 across 4,000 validation stories (Table~\ref{tab:explored-models}). Clean-trained test endpoints at 0\% and 20\% swaps are shown alongside validation scores for context, and Chapter~\ref{ch:discussion} notes the methodological implications of inspecting early test numbers.
+Before locking the main three-seed evaluation, we screened the two scratch baselines alongside seven exploratory variations using the unweighted mean of clean and 10\%-swapped validation Macro-F1 across 4,000 validation stories and both clean and augmented training arms at screening seed 42 (Table~\ref{tab:explored-models}). Clean-trained test endpoints at 0\% and 20\% swaps are shown alongside validation scores for context (three-seed means except the single-seed \textit{Scheduled Word CNN} control), and Chapter~\ref{ch:discussion} notes the methodological implications of inspecting early test numbers.
 
 \begin{table}[H]
 \centering\small\setlength{\tabcolsep}{4pt}
@@ -12,30 +12,30 @@ Before locking the main three-seed evaluation, we screened nine candidate variat
 Candidate model & Summary of design & Val. (\%) & Clean / 20\% test (\%) & Role in final study \\
 \midrule
 \textit{Word TF-IDF LR} & Word + bigram TF-IDF, LR & 89.51 & 90.05 / 89.14 & Fast word-only baseline \\
-Word TF-IDF Linear SVM & Same TF-IDF, hinge loss & 89.86 & 90.68 / 89.79 & Alternative linear classifier \\
+Word TF-IDF Linear SVM & Same TF-IDF, squared hinge loss & 89.86 & 90.68 / 89.79 & Alternative linear classifier \\
 Word + char TF-IDF LR & Adds 3 to 5 character fragments (weight 0.5) & 89.75 & 90.50 / 89.47 & Character feature comparison \\
 \textit{Interior-sorted TF-IDF LR} & Sorts interior word letters & 89.77 & 90.09 / 90.09 & Swap-invariant control \\
 Frozen BGE + tuned head & Cached 384-dim BGE + MLP & 90.24 & 90.63 / 89.50 & External encoder reference \\
 Hybrid word + char + BGE & Combines lexical features and frozen BGE & 91.27 & 91.88 / 90.92 & Fusion comparison \\
 \textit{Word CNN} & Word IDs + convs (8 epochs) & 86.36 & 86.79 / 84.48 & Word neural phrase model \\
-\textit{Scheduled Word CNN} & \textit{Word CNN} over 16 epochs + decay & 86.68 & 87.22 / 84.64 & Schedule-matched control \\
+\textit{Scheduled Word CNN} & \textit{Word CNN} over 16 epochs + decay & 86.68 & 87.22 / 84.64$^\dagger$ & Schedule-matched control \\
 \textit{Subword CNN} & Adds hashed chars (16 epochs) & 87.20 & 87.18 / 85.32 & Main subword neural model \\
 \bottomrule
 \end{tabularx}
-\caption[Explored and selected models]{Validation objective and clean-trained test accuracy for nine candidates. The validation score averages Macro-F1 on clean and 10\%-swapped validation text, paired with 0\% and 20\% official test accuracies.}
+\caption[Explored and selected models]{Validation objective and clean-trained test accuracy for the nine models. Val.\ (\%) averages clean and 10\%-swapped validation Macro-F1 across both clean and augmented training arms at seed 42; test columns report three-seed clean-trained accuracies at 0\% and 20\% swaps, except $^\dagger$seed 42 only.}
 \label{tab:explored-models}
 \end{table}
 
 These exploratory checks clarified what helps on noisy text. Switching logistic regression to a linear SVM raised clean test accuracy to 90.68\% and 20\%-swap accuracy to 89.79\%, while adding character slices to TF-IDF raised noisy accuracy to 89.47\% with tiny runtime overhead. We kept \textit{Word TF-IDF LR} as the main baseline because it uses only words and word pairs and produces calibrated class probabilities.
 
-\textit{Interior-sorted TF-IDF LR} sorts each word's middle letters alphabetically while keeping first and last letters fixed, making interior swaps completely invisible and holding accuracy steady at 90.09\% across 0\% and 20\% swaps. At the same time, flattening internal order merges valid anagrams across 237 training vocabulary groups (3.14\% of training word types, such as \texttt{form} with \texttt{from} and \texttt{united} with \texttt{untied}) and offers no defense against insertions or deletions.
+\textit{Interior-sorted TF-IDF LR} sorts each word's middle letters alphabetically while keeping first and last letters fixed, making interior swaps completely invisible and holding accuracy steady at 90.09\% across 0\% and 20\% swaps. At the same time, flattening internal order collapses 237 colliding signature groups in the clean training vocabulary (476 of 31,772 word types, or 1.50\% of types and 3.14\% of training token occurrences, including valid pairs such as \texttt{form}/\texttt{from} and \texttt{three}/\texttt{there} alongside raw-corpus typos) and offers no defense against insertions or deletions.
 
-We also tested cached 384-dimensional vectors from a frozen pretrained transformer encoder, \texttt{BAAI/bge-small-en-v1.5} \citep{bgesmall} (revision \texttt{5c38ec7c} \citep{bgecheckpoint}). Training a lightweight classifier head (dropout 0.2, learning rate 0.003) reached 90.63\% clean accuracy and 89.50\% at 20\% swaps, while fusing lexical TF-IDF, character slices, and frozen BGE vectors climbed to 91.88\% clean and 90.92\% noisy (92.04\% clean with an SVM head). We kept pretrained features separate from our main triad because upstream overlap with AG News is unknown and CPU extraction required 47 minutes.
+We also tested cached 384-dimensional vectors from a frozen pretrained transformer encoder, \texttt{BAAI/bge-small-en-v1.5} \citep{bgesmall} (revision \texttt{5c38ec7c} \citep{bgecheckpoint}). Training a 128-unit MLP head (dropout 0.2, learning rate 0.003) reached 90.63\% clean accuracy and 89.50\% at 20\% swaps, while fusing lexical TF-IDF, character slices, and frozen BGE vectors climbed to 91.88\% clean and 90.92\% noisy (92.04\% clean and 91.29\% noisy with a linear SVM). We kept pretrained features separate from our main triad because upstream overlap with AG News is unknown and baseline CPU feature extraction required 45.8 minutes (46.7 minutes including the six baseline head fits, plus 5.3 minutes to encode confirmation views).
 
 \section{Tuning and learning dynamics}
 All regularization and early-stopping choices maximize the average of clean and 10\%-swapped validation Macro-F1 across the 4,000 validation stories. On clean training, \textit{Word TF-IDF LR} scored 88.82\% at $C = 0.5$, peaked slightly at $C = 2.0$ with 89.54\%, and scored 89.53\% at $C = 8.0$. Under augmented training, every independent run shifted to looser regularization at $C = 8.0$ (averaging 88.74\% at $C = 0.5$, 89.27\% at $C = 2.0$, and 89.39\% at $C = 8.0$) so intact clues could retain stronger class weights alongside noisy surface variants.
 
-Validation scores also selected CNN early-stopping checkpoints (Figure~\ref{fig:learning}). In the primary development run, \textit{Word CNN} peaked at epoch 7 out of 8 in both arms, scoring 86.12\% combined Macro-F1 clean (86.44\% clean, 85.81\% swaps) and 86.60\% augmented (86.92\% clean, 86.29\% swaps). \textit{Subword CNN} peaked at epoch 12 out of 16 cleanly (87.15\%, from 87.61\% and 86.68\%) and epoch 11 out of 15 under augmentation (87.25\%, from 87.76\% and 86.75\%). Training cross-entropy kept falling past those peaks while validation plateaued, and \textit{Subword CNN} already led the 16-epoch word control from epochs 2 to 8 before learning-rate decay began.
+Validation scores also selected CNN early-stopping checkpoints (Figure~\ref{fig:learning}). In the seed-42 development run, \textit{Word CNN} peaked at epoch 7 out of 8 in both arms, scoring 86.12\% combined Macro-F1 clean (86.44\% clean, 85.81\% swaps) and 86.60\% augmented (86.92\% clean, 86.29\% swaps), averaging 86.36\% across arms in Table~\ref{tab:explored-models}. \textit{Subword CNN} peaked at epoch 12 out of 16 cleanly (87.15\%, from 87.61\% and 86.68\%) and epoch 11 out of 15 under augmentation (87.25\%, from 87.76\% and 86.75\%), averaging 87.20\% across arms. Training cross-entropy kept falling past those peaks while validation plateaued, and \textit{Subword CNN} already led the 16-epoch word control from epochs 2 to 8 before learning-rate decay began.
 
 \begin{figure}[H]\centering
 \includegraphics[width=.84\linewidth]{figures/cnn_learning.pdf}
@@ -48,6 +48,6 @@ Once screening ended, we froze all model recipes and stopping rules before evalu
 
 Clean \textit{Word TF-IDF LR} runs deterministically, while augmented linear and CNN figures average three independent training seeds. To capture test-set sampling uncertainty around saved checkpoints without assuming normality, we report 95\% confidence intervals built from 2,000 class-stratified bootstrap resamples holding fitted weights and swap draws fixed. This keeps test-sample margin of error cleanly separated from variance across training seeds.
 
-All standalone fits ran on Windows 11 with four AMD Ryzen 3 4300U CPU threads without GPU acceleration (Table~\ref{tab:fit-cost-review}). Recording isolated single-recipe runtimes separately from candidate screening and the 47-minute BGE extraction pass highlights the speed gap between sparse linear fitting and iterative gradient training on standard CPU hardware.
+All standalone fits ran on Windows 11 with four AMD Ryzen 3 4300U CPU threads without GPU acceleration (Table~\ref{tab:fit-cost-review}). Recording isolated single-recipe runtimes separately from candidate screening and the 45.8-minute baseline BGE extraction pass highlights the speed gap between sparse linear fitting and iterative gradient training on standard CPU hardware.
 
 \input{tables/fit-cost-review}

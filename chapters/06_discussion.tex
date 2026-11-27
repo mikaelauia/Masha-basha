@@ -7,7 +7,7 @@ Convolutional neural networks paired with global max pooling behave differently 
 
 Training with spelling swaps boosts \textit{Subword CNN} by an average of 0.31 to 0.46 points across three 20\% test draws because clean and misspelled variants share character-fragment buckets. Word-only networks benefit only when repeated typos enter their fixed word list, while TF-IDF automatically ignores rare one-off typos via its minimum document count. Seed-to-seed swings and the small clean confirmation dip keep this static augmentation benefit modest (Tables~\ref{tab:app-seed-draws} and~\ref{tab:held-out-review}).
 
-Runtime and exploratory screens sharpen this comparison. On four CPU threads, \textit{Word TF-IDF LR} tunes in 13 seconds median versus 219 seconds for \textit{Word CNN} and 642 seconds for \textit{Subword CNN} (Table~\ref{tab:fit-cost-review}). Exploratory runs also showed cheap gains from adding character slices to TF-IDF and higher accuracy near 92\% from fusing lexical, character, and frozen BGE features when 47 minutes of upstream encoding are acceptable (Table~\ref{tab:explored-models}).
+Runtime and exploratory screens sharpen this comparison. On four CPU threads, \textit{Word TF-IDF LR} tunes in 13 seconds median versus 219 seconds for \textit{Word CNN} and 642 seconds for \textit{Subword CNN} (Table~\ref{tab:fit-cost-review}). Exploratory runs also showed cheap gains from adding character slices to TF-IDF and higher accuracy near 92\% from fusing lexical, character, and frozen BGE features when 45.8 minutes of baseline CPU encoding are acceptable (Table~\ref{tab:explored-models}).
 
 \section{Training schedule}
 Our primary neural comparison changes token representation and optimization schedule together: \textit{Subword CNN} adds 786,528 character weights and trains up to 16 epochs with learning-rate plateau decay, while \textit{Word CNN} stops at eight fixed-rate epochs. On seed 42 under augmentation, extending \textit{Word CNN} to that same 16-epoch schedule (\textit{Scheduled Word CNN}, Table~\ref{tab:scheduled-review}) lifts 20\%-swap accuracy from 84.75\% to 85.50\%, leaving just 0.07 points to \textit{Subword CNN}. Even though \textit{Subword CNN} led on validation across epochs 2 to 8 before decay started (Figure~\ref{fig:learning}), testing only one seed means schedule and capacity cannot be separated cleanly from these runs alone.
@@ -27,7 +27,7 @@ A full $2 \times 2$ comparison crossing words versus subwords with eight-epoch v
 \toprule
 Token representation & Short schedule (8 epochs, patience 2, constant LR) & Long schedule (16 epochs, patience 4, plateau LR decay) \\
 \midrule
-Words only & \textit{Word CNN} (evaluated across 3 runs) & \textit{Scheduled Word CNN} (primary run, extend to 3 runs) \\
+Words only & \textit{Word CNN} (evaluated across 3 runs) & \textit{Scheduled Word CNN} (seed 42 only, extend to 3 runs) \\
 Words + fragments & Short-schedule \textit{Subword CNN} (missing control) & \textit{Subword CNN} (evaluated across 3 runs) \\
 \bottomrule
 \end{tabularx}
