@@ -17,7 +17,7 @@ To preserve recognizable pieces of unseen or corrupted spellings without blowing
 Official test article 47, a \emph{Sci/Tech} brief on Dell pulling back from low-cost consumer PCs in China, makes these architectural differences tangible in place (Table~\ref{tab:observed-swap}). Under a 5\% noise budget, the single swap changes \texttt{china consumer pc} to \texttt{china cosnumer pc}. Because \texttt{consumer} still appears cleanly later in the same item, \textit{Word TF-IDF LR} retains the unigram in its checklist at roughly 40\% lower normalized weight while losing only the corrupted bigram pair. Meanwhile, \textit{Word CNN} maps \texttt{cosnumer} straight to its shared fallback vector, and \textit{Subword CNN} keeps 6 of its 16 sampled character fragments in their exact clean buckets alongside intact neighbor words.
 
 \begin{table}[htbp]
-\centering\small
+\centering\normalsize
 \input{tables/observed_swap_features}
 \caption[Observed swap representations]{How the clean-trained models represent the \texttt{consumer} $\to$ \texttt{cosnumer} swap in official test article 47. Six of \textit{Subword CNN}'s 16 character fragments keep their pre-swap buckets.}
 \label{tab:observed-swap}

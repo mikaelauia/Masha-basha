@@ -20,8 +20,8 @@ Third, synthetic swaps and task labels bound generalization. Interior swaps leav
 Three focused extensions follow naturally from our diagnostic findings. First, executing the complete $2 \times 2$ factorial comparison in Table~\ref{tab:proposed-cnn-design} across all three runs and both training arms, adding the missing short-schedule \textit{Subword CNN} cell and equalizing word-table size so both architectures hold roughly 3.0 million scalars, would cleanly decouple subword composition from epoch schedule and capacity.
 
 \begin{table}[tbp]
-\centering\footnotesize\setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{32mm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\centering\normalsize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
 Token representation & Short schedule (8 epochs, patience 2, constant LR) & Long schedule (16 epochs, patience 4, plateau LR decay) \\
 \midrule
