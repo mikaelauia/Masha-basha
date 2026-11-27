@@ -16,7 +16,6 @@ The filtering audit removes 38 training rows whose normalized text matches a tes
 
 We use stratified sampling to select 20,000 training and 4,000 validation articles from the 119,557 remaining candidates. We sample another 4,000 for confirmation after excluding the 16 articles used in an early pipeline check. The four splits have no shared article IDs or matching normalized text across split boundaries.
 
-\Needspace{285pt}
 The 128-word limit truncates few articles (Table~\ref{tab:preprocessing-specs}). A separate transformer tokenization check found that at most 0.54\% of articles in any topic exceeded 128 subword pieces.
 
 \begin{table}[H]
@@ -66,9 +65,7 @@ def swap_word(word, probability, rng):
 
 We use clean and 10\%-swap inputs for validation and confirmation. Main testing uses all four targets. Two additional 20\% test draws check sensitivity to where the swaps land (Table~\ref{tab:evaluation-coverage} and Appendix~\ref{app:repro}).
 
-The official test set has 289,990 tokens, of which 187,152 are eligible for swaps. At the 20\% target, 37,494 tokens change. That is 20.03\% of eligible tokens and 12.93\% of all tokens.
-
-At least one word changes in 7,533 of the 7,600 articles (99.1\%). Figure~\ref{fig:swap-exposure} shows token and article exposure across the four targets.
+The official test set has 289,990 tokens, of which 187,152 are eligible for swaps. At the 20\% target, 37,494 tokens change. That is 20.03\% of eligible tokens and 12.93\% of all tokens. At least one word changes in 7,533 of the 7,600 articles (99.1\%). Figure~\ref{fig:swap-exposure} shows how token and article exposure change across the four targets.
 
 \begin{figure}[H]
 \centering
@@ -80,19 +77,16 @@ At least one word changes in 7,533 of the 7,600 articles (99.1\%). Figure~\ref{f
 Each primary model uses 20,000 articles in both training arms. The clean arm uses the normalized originals. For the augmented arm, we sample 50\% of the articles in each topic without replacement, apply the 10\% swap procedure with a run-specific seed, and replace those articles once before fitting. Roughly 9,100 of the 10,000 selected articles receive at least one edit. About 3.2\% of all training tokens change, including 24,791 tokens in the primary run.
 
 \section{Model architectures}\label{sec:models}
-The classifiers take the same normalized text and produce four unnormalized topic scores (logits). Figure~\ref{fig:model-flow} shows the steps from representation to scoring.
+The classifiers take the same normalized text and produce four unnormalized topic scores (logits). Figure~\ref{fig:model-flow} shows the steps from representation to scoring. Fitting vocabulary, feature weights, and embeddings uses only the active 20,000-article training arm.
 
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{figures/core_prediction_flow.pdf}
 \caption[Model prediction pipelines]{Prediction flow from normalized text to four topic scores for the three main models.}\label{fig:model-flow}
 \end{figure}
 
-Each model fits its vocabulary, feature weights, or embeddings using only the active 20,000-article training arm.
+Table~\ref{tab:model-tech-summary} compares the three models' feature sizes, layers, and fitting settings. The following sections explain how each model represents the input.
 
-\Needspace{230pt}
-Table~\ref{tab:model-tech-summary} compares the three models' feature sizes, layers, and fitting settings.
-
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering\small\setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{29mm}>{\raggedright\arraybackslash}p{38mm}>{\raggedright\arraybackslash}p{38mm}>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -126,7 +120,7 @@ Each article is encoded into 128 positions with 96-dimensional vectors. The word
 A positive filter bias can make padding appear to contain a strong match. For article length $\ell_i$ and kernel width $k$, we set responses after position $\max(1,\ell_i-k+1)$ to $-\infty$ before max pooling. Pooling keeps one value per filter, yielding 192 features. We apply dropout at rate 0.5 during training and use a linear layer for the four logits.
 
 \subsection{Subword CNN}
-We mark each token with \texttt{<} and \texttt{>} and extract fragments of three, four, and five characters. If there are more than 16 fragments, we keep 16 at evenly spaced indices. A 64-bit little-endian \texttt{BLAKE2b} hash maps fragments into 8,192 buckets. A separate row handles padding and stays frozen.
+We mark the start and end of each token with \texttt{<} and \texttt{>} and extract fragments of lengths three, four, and five. If a token yields more than 16 fragments, we keep 16 at evenly spaced indices. A 64-bit little-endian \texttt{BLAKE2b} hash maps each fragment to one of 8,192 buckets, with an additional frozen padding row.
 
 PyTorch's \texttt{EmbeddingBag} averages the selected fragment vectors, and we add that mean to the whole-word vector before convolution. The fragment table raises the parameter count by 786,528, or 26.6\%. Table~\ref{tab:cnn-parameter-breakdown} in Appendix~\ref{app:decisions} breaks down the counts by layer.
 

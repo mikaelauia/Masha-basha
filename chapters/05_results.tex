@@ -10,7 +10,7 @@ To answer RQ1, we scored the three clean-trained models on all 7,600 official te
 
 \textit{Word TF-IDF LR} has the highest accuracy at each swap target and the smallest drop, from 90.05\% to 89.14\%. \textit{Word CNN} loses 2.31 percentage points (86.79\% to 84.48\%), and \textit{Subword CNN} loses 1.86 points (87.18\% to 85.32\%). The subword model leads the word-only CNN by 0.38 points on clean text (95\% interval $[+0.07, +0.71]$) and 0.83 points at 20\% swaps ($[+0.49, +1.20]$).
 
-The vocabulary audit offers one explanation for the word-only CNN's drop. Its unknown-token rate rises from 2.01\% on clean validation text to 8.13\% at 10\% swaps. Table~\ref{tab:corefull} gives accuracy and Macro-F1 for both training arms.
+The vocabulary audit offers one explanation for the word-only CNN's drop. Its unknown-token rate rises from 2.01\% on clean validation text to 8.13\% at 10\% swaps. Table~\ref{tab:corefull} gives accuracy and Macro-F1 for both training arms. The two aggregate metrics are within 0.06 percentage points in every cell.
 
 \begin{table}[!htbp]\centering\normalsize\setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{llrrrr}\toprule
@@ -24,8 +24,6 @@ Model & Training arm & 0\% swaps & 5\% swaps & 10\% swaps & 20\% swaps \\\midrul
 \end{tabular}
 \caption[Official test results]{Official test accuracy / Macro-F1 (\%) across typo rates and training arms. Non-deterministic rows average three independent runs, with run standard deviations in Appendix~\ref{app:decisions}.}\label{tab:corefull}
 \end{table}
-
-The two aggregate metrics are within 0.06 percentage points in every cell.
 
 \Needspace{180pt}
 \section{Training with typos}
@@ -115,12 +113,10 @@ Both CNNs correctly predict more true \emph{World} articles at 20\% swaps, even 
 
 \input{tables/confusion-review}
 
-Per-article correctness gives another view of the same results (Figure~\ref{fig:paired-changes}). At 20\% swaps, \textit{Word TF-IDF LR} loses 142 correct predictions and gains 73, a net loss of 69. The number of articles that change correctness is 492 for \textit{Word CNN} and 477 for \textit{Subword CNN}.
+Per-article correctness gives another view of the same results (Figure~\ref{fig:paired-changes}). At 20\% swaps, \textit{Word TF-IDF LR} loses 142 correct predictions and gains 73, a net loss of 69. The number of articles that change correctness is 492 for \textit{Word CNN} and 477 for \textit{Subword CNN}. At 5\% and 10\% swaps, the subword model loses fewer correct predictions than the word-only CNN (82 versus 118, and 153 versus 188).
 
 \Needspace{570pt}
 \subsection{Individual articles}
-\begingroup
-\setlength{\intextsep}{7pt plus 1pt minus 2pt}
 Table~\ref{tab:error-examples} lists examples where an edit changes the predicted topic. When \texttt{hong kong} becomes \texttt{hong knog}, or \texttt{processor} becomes \texttt{porcessor}, the linear baseline shifts its prediction to \emph{Business}. In both cases, surviving financial terms can still contribute to the score.
 
 In article \texttt{test:435}, changing \texttt{technology} to \texttt{technolgoy} shifts the linear model to \emph{Business} and the subword model to \emph{World}. In article \texttt{test:415}, changing \texttt{either} to \texttt{etiher} shifts \textit{Word CNN} from \emph{Sports} to \emph{Sci/Tech}. That second example is consistent with the CNN depending on a local phrase, even when the edited word has little topical information by itself.
@@ -152,7 +148,3 @@ An edit can also restore the correct topic. In the Honda Formula One article, sw
 \includegraphics[width=\linewidth]{figures/paired_prediction_changes.pdf}
 \caption[Paired changes in correctness]{Changes from correct to wrong and from wrong to correct on the 7,600 official test articles, relative to 0\% swaps. All three primary fits use clean training.}\label{fig:paired-changes}
 \end{figure}
-
-At 5\% and 10\% swaps, \textit{Subword CNN} loses fewer correct predictions than \textit{Word CNN} (82 versus 118, and 153 versus 188).
-\par
-\endgroup
