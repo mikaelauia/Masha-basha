@@ -1,6 +1,6 @@
 \chapter{Discussion}\label{ch:discussion}
 
-\section{Why the linear baseline held up}
+\section{Representation and robustness trade-offs}
 At the 20\% swap target, 99.1\% of test articles contain at least one edit, while about 87\% of all words remain intact (Figure~\ref{fig:swap-exposure}). \textit{Word TF-IDF LR} scores the whole article by adding evidence from its words and word pairs. An edit can remove a few features while leaving other clues in the headline and summary.
 
 A CNN with global max pooling keeps one response per filter. If a swap hits the window that produced the strongest response, the pooled score can change sharply. The \texttt{either} example in Table~\ref{tab:error-examples} is consistent with this mechanism. The CNNs also change correctness more than twice as often as the linear model at 20\% swaps (Figure~\ref{fig:paired-changes}). Their \emph{Business} errors and false positive \emph{World} predictions illustrate why topic-level measures add information to overall accuracy.

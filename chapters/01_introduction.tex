@@ -1,26 +1,26 @@
 \chapter{Introduction}\label{ch:introduction}
 
 \section{Motivation and task}
-Readers can often recognize a word after two letters are swapped, although these edits slow reading \citep{rayner2006}. A news classifier can lose an important clue when a familiar word becomes an unseen spelling.
+News routing pipelines often ingest noisy text from fast copy editing, optical character recognition, and wire typing slips. Readers can usually recognize a word after two letters are swapped, although these edits slow reading \citep{rayner2006}, while an automated classifier can lose a decisive clue as soon as one familiar word becomes an unseen spelling.
 
-On AG News \citep{zhang2015,agmirror}, the models use the headline and summary to classify each article as \emph{World}, \emph{Sports}, \emph{Business}, or \emph{Sci/Tech}. We introduce errors by swapping neighboring letters inside a word, as in \texttt{consumer} becoming \texttt{cosnumer}. All models receive the same test articles and edits.
+On AG News \citep{zhang2015,agmirror}, each model uses the headline and summary to classify articles into \emph{World}, \emph{Sports}, \emph{Business}, or \emph{Sci/Tech}. We simulate typing errors by swapping two neighboring interior letters inside eligible words while keeping outer anchor letters, word length, and boundaries intact, turning \texttt{consumer} into \texttt{cosnumer}. Preserving human readability ensures degradation reflects representation sensitivity rather than label ambiguity, and identical deterministic edits keep comparisons fair across models.
 
 \section{Research questions}
-We train each main model from scratch on 20,000 labeled articles, with separate sets for validation, testing, and confirmation. The swap rate is the probability of editing an eligible word. The main test uses rates of 0\%, 5\%, 10\%, and 20\%.
+We train all three primary models from scratch on 20,000 labeled articles, separating disjoint splits for validation, testing, and confirmation. Fixing both dataset budget and CPU hardware puts accuracy, typo tolerance, and fit speed on equal footing. Swap rate denotes the probability of editing an eligible word, evaluated up to 20\%.
 
 \begin{description}
 \item[RQ1.] How do the TF-IDF baseline, \textit{Word CNN}, and \textit{Subword CNN} compare in test accuracy as spelling errors become more frequent?
 \item[RQ2.] Does training with spelling errors improve accuracy on noisy articles while keeping accuracy on clean articles?
 \end{description}
 
-RQ1 uses clean training. For RQ2, we replace half of the training articles in each topic with copies edited at the 10\% swap rate. This keeps the training budget fixed. We compare three fitting seeds and check two additional 20\% swap draws. A 16-epoch \textit{Word CNN} control tests the effect of a longer schedule.
+RQ1 uses clean training. For RQ2, half of each topic's training articles are replaced in place at the 10\% swap rate to preserve the fixed 20,000-article budget. We compare three fitting seeds, check two extra 20\% test draws, and run a 16-epoch \textit{Word CNN} control to isolate schedule length from subword modeling.
 
 \section{Approach and findings}
-The three models differ in how they use words and phrases.
+The three models represent text differently.
 \begin{itemize}
-\item \textit{Word TF-IDF LR} uses single words and adjacent word pairs from the whole article. TF-IDF weights the features, and logistic regression combines them into topic scores.
-\item \textit{Word CNN} scans windows of three to five words and keeps each filter's strongest match. Unfamiliar spellings share a single unknown-word vector.
-\item \textit{Subword CNN} adds vectors for character fragments before scanning the same windows. Fragments that survive a typo can still contribute to the word representation.
+\item \textit{Word TF-IDF LR} combines weighted unigrams and adjacent word pairs across the whole article using logistic regression.
+\item \textit{Word CNN} scans ordered windows of three to five words and keeps each filter's peak response, collapsing unfamiliar spellings into one unknown-word vector.
+\item \textit{Subword CNN} averages hashed character-fragment vectors into each word representation so surviving prefixes and suffixes still reach the filters.
 \end{itemize}
 
-We screened nine variants before the main comparison (Chapter~\ref{ch:experiments}). Among the three main models, \textit{Word TF-IDF LR} was the most accurate at every swap rate and had the shortest fit time. Training with swaps gave \textit{Subword CNN} a small accuracy gain at the 20\% target (Chapter~\ref{ch:results}).
+Following a nine-candidate validation screen (Chapter~\ref{ch:experiments}), \textit{Word TF-IDF LR} leads at every swap rate and tunes fastest, while noisy training gives \textit{Subword CNN} a modest gain at 20\% swaps (Chapter~\ref{ch:results}). Remaining chapters detail representation design, methodology, exploratory runs, error dynamics, and conclusions.
