@@ -58,8 +58,13 @@ The combined validation score determines which CNN checkpoint we keep. In the pr
 
 \input{tables/chosen_epochs}
 
-Training loss continues to fall after validation performance levels off. Figure~\ref{fig:learning} shows that pattern in both training arms. \textit{Subword CNN} leads the schedule-matched word model in validation from epochs 2 to 8, before the learning rate decays.
+\textit{Subword CNN} leads the schedule-matched word model in validation from epochs 2 to 8, before the learning rate decays.
 
+\Needspace{340pt}
+Training loss continues to fall after validation performance levels off in both training arms (Figure~\ref{fig:learning}).
+
+\begingroup
+\setlength{\intextsep}{6pt plus 1pt minus 1pt}
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{figures/cnn_learning.pdf}
 \caption[CNN learning curves]{Validation Macro-F1 and training cross-entropy by epoch for the primary run. The two word CNN curves overlap through epoch 8.}\label{fig:learning}
@@ -86,6 +91,10 @@ Extra draws (7,600) & 20\% (2 extra sets) & All 18 saved runs (2 arms) & Ranking
 
 Clean \textit{Word TF-IDF LR} is deterministic. For article sampling uncertainty, we use 2,000 class-stratified bootstrap resamples for 95\% intervals with fixed models and edits.
 
-Fits used four AMD Ryzen 3 4300U CPU threads on Windows 11. Table~\ref{tab:fit-cost-review} excludes exploratory runs and the 47-minute BGE encoding pass.
+Table~\ref{tab:fit-cost-review} compares fits on four AMD Ryzen 3 4300U CPU threads under Windows 11.
 
 \input{tables/fit-cost-review}
+
+The timings exclude exploratory runs and the 47-minute BGE encoding pass.
+\par
+\endgroup
