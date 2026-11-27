@@ -3,14 +3,15 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern,microtype}
-\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,array,tabularx}
-\usepackage{eso-pic,xcolor,caption,placeins}
+\usepackage{amsmath,graphicx,booktabs,array,tabularx}
+\usepackage{amsfonts}
+\usepackage{eso-pic,xcolor,titlesec,float}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[obeyspaces]{url}
 \usepackage{hyperref}
 \usepackage{listings,needspace}
 \setlength{\parindent}{0mm}
-\setlength{\parskip}{4pt plus 1pt}
+\setlength{\parskip}{6pt plus 1pt minus 1pt}
 \setlength{\oddsidemargin}{0mm}
 \setlength{\evensidemargin}{0mm}
 \setlength{\topmargin}{-20mm}
@@ -20,16 +21,36 @@
 \definecolor{darkgreen}{rgb}{0.15,0.35,0.30}
 \hypersetup{colorlinks=true,citecolor=darkgreen,urlcolor=darkgreen,linkcolor=black,
 pdfauthor={Eivind Bakken and Mikael Andersstuen},pdftitle={Robust News Classification under Controlled Spelling Errors},pdfsubject={IKT466 final project},pdfstartview=Fit}
-\captionsetup{font=small,labelfont=bf}
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries}{\large\chaptertitlename~\thechapter}{4pt}{\huge}
+\titlespacing*{\chapter}{0pt}{5pt}{15pt}
+\titlespacing*{\section}{0pt}{12pt plus 2pt minus 2pt}{4pt plus 1pt}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 1pt}{3pt}
+\setlength{\abovecaptionskip}{6pt}
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\textfloatsep}{11pt plus 2pt minus 3pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{11pt plus 2pt minus 2pt}
+\renewcommand{\arraystretch}{1.10}
 \lstset{basicstyle=\small\ttfamily,breaklines=true,breakatwhitespace=true,columns=fullflexible,keepspaces=true,frame=single,showstringspaces=false}
+\lstdefinelanguage{Python}{morekeywords={def,for,in,if,not,return},sensitive=true,morecomment=[l]\#}
 \newcommand{\artifact}[1]{{\small\nolinkurl{#1}}}
 \renewcommand{\bibfont}{\footnotesize}
+\renewcommand{\bibsection}{\chapter*{References}\addcontentsline{toc}{chapter}{References}}
 \setlength{\bibsep}{2pt}
-\newcommand{\fig}[3]{\begin{figure}[htbp]\centering\includegraphics[width=#2\linewidth]{figures/#1}\caption{#3}\end{figure}}
-\newcommand{\pp}{\,\mathrm{pp}}
 \setcounter{tocdepth}{1}
 \setcounter{secnumdepth}{2}
 \makeatletter
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \sbox\@tempboxa{\small\textbf{#1.}\enspace #2}%
+  \ifdim\wd\@tempboxa>\hsize
+    {\small\textbf{#1.}\enspace #2\par}%
+  \else
+    \global\@minipagefalse
+    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
 \setlength{\@fptop}{0pt}
 \setlength{\@fpsep}{12pt}
 \makeatother
@@ -37,33 +58,43 @@ pdfauthor={Eivind Bakken and Mikael Andersstuen},pdftitle={Robust News Classific
 
 \raggedbottom
 \renewcommand{\labelitemi}{\ensuremath{\bullet}}
-\IfFileExists{ec-lmr6.tfm}{}{%
+\IfFileExists{ec-lmr9.tfm}{}{%
   \makeatletter\input{t1lmr.fd}\makeatother
-  \DeclareFontShape{T1}{lmr}{m}{n}{<-8.5>ec-lmr8 <8.5-9.5>ec-lmr9
-    <9.5-11>ec-lmr10 <11-15>ec-lmr12 <15->ec-lmr17}{}%
+  \DeclareFontShape{T1}{lmr}{m}{n}{<-9>ec-lmr8 <9-11>ec-lmr10
+    <11-15>ec-lmr12 <15->ec-lmr17}{}%
+}
+\IfFileExists{ec-lmri9.tfm}{}{%
+  \DeclareFontShape{T1}{lmr}{m}{it}{<->ec-lmri10}{}%
 }
 \IfFileExists{ec-lmbx9.tfm}{}{%
   \DeclareFontShape{T1}{lmr}{bx}{n}{<-11>ec-lmbx10 <11->ec-lmbx12}{}%
   \makeatletter\input{t1lmtt.fd}\makeatother
   \DeclareFontShape{T1}{lmtt}{m}{n}{<->ec-lmtt10}{}%
 }
-\IfFileExists{lmmi6.pfb}{}{%
+\IfFileExists{lmmi7.tfm}{}{%
   \input{omllmm.fd}\input{omslmsy.fd}\input{ot1lmr.fd}%
-  \DeclareFontShape{OML}{lmm}{m}{it}{<-9.5>lmmi8 <9.5->lmmi10}{}%
-  \DeclareFontShape{OMS}{lmsy}{m}{n}{<-7.5>lmsy7 <7.5-9.5>lmsy8
+  \DeclareFontShape{OML}{lmm}{m}{it}{<-7.5>lmmi6 <7.5-9.5>lmmi8 <9.5->lmmi10}{}%
+  \DeclareFontShape{OMS}{lmsy}{m}{n}{<-7.5>lmsy6 <7.5-9.5>lmsy8
     <9.5->lmsy10}{}%
-  \DeclareFontShape{OT1}{lmr}{m}{n}{<-7.5>rm-lmr7 <7.5-9.5>rm-lmr8
+  \DeclareFontShape{OT1}{lmr}{m}{n}{<-9.5>rm-lmr8
     <9.5->rm-lmr10}{}%
+}
+\IfFileExists{msam5.tfm}{}{%
+  \input{umsa.fd}%
+  \DeclareFontShape{U}{msa}{m}{n}{<->msam10}{}%
+}
+\IfFileExists{msbm5.tfm}{}{%
+  \input{umsb.fd}%
+  \DeclareFontShape{U}{msb}{m}{n}{<->msbm10}{}%
 }
 \clubpenalty=10000
 \widowpenalty=10000
 \displaywidowpenalty=10000
-\interlinepenalty=10000
 \predisplaypenalty=10000
-\postdisplaypenalty=10000
 \renewcommand{\topfraction}{0.9}
 \renewcommand{\bottomfraction}{0.8}
 \renewcommand{\textfraction}{0.1}
-\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\floatpagefraction}{0.70}
+\setcounter{totalnumber}{3}
 
 
