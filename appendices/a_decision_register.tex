@@ -5,7 +5,7 @@ In the final three-seed comparison, \textit{Subword CNN} reuses its seed-42 vali
 \section{Model settings}
 Table~\ref{tab:app-hyperparams} summarizes preprocessing, architecture, and optimization settings across the shared 20,000-article training and 4,000-article validation splits.
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering\small
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{35mm}>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -22,15 +22,41 @@ Training arms & Clean training uses 20,000 uncorrupted articles (5,000 per topic
 \caption[Model and training settings]{Summary of preprocessing, feature extraction, architecture, and optimization settings.}
 \label{tab:app-hyperparams}
 \end{table}
-\FloatBarrier
+Both CNNs use the same word embedding and convolutional dimensions. Table~\ref{tab:cnn-parameter-breakdown} shows how the character fragment table accounts for the difference in stored parameters.
 
+\begin{table}[H]
+\centering\normalsize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Architecture component & \textit{Word CNN} & \textit{Subword CNN} \\
+\midrule
+Word embedding table ($30{,}000 \times 96$) & 2,880,000 & 2,880,000 \\
+Convolutional filters and biases (64 each at widths 3, 4, 5) & 73,920 & 73,920 \\
+Linear classification head ($192 \times 4 + 4$) & 772 & 772 \\
+Character fragment embedding table ($8{,}193 \times 96$) & 0 & 786,528 \\
+\midrule
+Total stored parameters & 2,954,692 & 3,741,220 \\
+\bottomrule
+\end{tabular}
+\caption[CNN parameter breakdown]{Parameter counts for the convolutional architectures, including frozen padding rows.}
+\label{tab:cnn-parameter-breakdown}
+\end{table}
+
+\Needspace{300pt}
 \section{Seed-level results}
-Table~\ref{tab:core-fit-sd} reports sample standard deviations across seeds 42, 43, and 44 for the means in Table~\ref{tab:corefull}. Table~\ref{tab:scheduled-review} summarizes the seed-42 schedule control across all four official test swap targets, and Table~\ref{tab:app-seed-draws} gives per-seed test accuracies at 20\% swaps across draws 41001, 41002, and 41003.
+The means in Table~\ref{tab:corefull} combine three fitting seeds. Table~\ref{tab:core-fit-sd} shows the corresponding sample standard deviations. The largest accuracy variation is 0.76 percentage points for clean-trained \textit{Subword CNN} at 20\% swaps.
 
 \input{tables/core_fit_variation}
+
+Table~\ref{tab:scheduled-review} compares the seed-42 CNNs at 0\% and 20\% swaps. Under augmented training, extending the word-only schedule raises the 20\%-swap score from 84.75\% to 85.50\%. The subword model scores 85.57\% under the longer schedule.
+
 \input{tables/scheduled-review}
 
-\begin{table}[!htbp]
+At the intermediate 5\% and 10\% swap targets, \textit{Scheduled Word CNN} scores 86.43\% and 86.21\% under clean training (Macro-F1 86.41\% and 86.18\%). Under augmented training, it scores 86.59\% and 86.14\% (Macro-F1 86.60\% and 86.15\%).
+
+Table~\ref{tab:app-seed-draws} gives all seed-level accuracies for the three 20\% test draws. The subword model benefits from augmentation most consistently at seed 42.
+
+\begin{table}[H]
 \centering\small
 \begin{tabular}{@{}llrrrrrr@{}}
 \toprule
@@ -51,9 +77,7 @@ Model & Seed & Clean & Aug. & Clean & Aug. & Clean & Aug. \\
  & 44 & 85.47 & 85.41 & 85.50 & 85.17 & 85.51 & 85.49 \\
 \bottomrule
 \end{tabular}
-\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003.}
+\caption[Per-seed accuracies across draws]{Individual test accuracies by seed (\%) at 20\% swaps across draws 41001, 41002, and 41003. Clean and Aug. refer to the two training arms.}
 \label{tab:app-seed-draws}
 \end{table}
-\FloatBarrier
-
 The project archive stores full-precision aggregate and seed-level metrics, validation histories, confirmation-set predictions, paired bootstrap intervals, and all follow-up outputs.
