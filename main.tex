@@ -32,8 +32,9 @@
 \chapter*{Figures, Tables, and Listings}
 \addcontentsline{toc}{chapter}{Figures, Tables, and Listings}
 \begingroup
-\small
-\setlength{\parskip}{1pt}
+\footnotesize
+\setlength{\parskip}{0pt}
+\renewcommand{\section}[2]{\par\vspace{0.45\baselineskip}\noindent{\normalsize\bfseries #2}\par\vspace{0.2\baselineskip}}
 \makeatletter
 \section*{Figures}
 \@starttoc{lof}
