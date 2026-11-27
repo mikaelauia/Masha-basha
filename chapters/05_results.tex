@@ -55,6 +55,7 @@ Scoring all 18 saved checkpoints across two more independent 20\% test draws con
 
 Individual article predictions vary more than split averages hide. Across the three 20\% draws, fixed clean models flip topics on 6.1\% of articles for \textit{Word TF-IDF LR}, versus 11.8\% for \textit{Word CNN} and 11.3\% for \textit{Subword CNN}. On official test article 0 (Section~\ref{sec:models}), clean \textit{Subword CNN} predicts \emph{World} twice and \emph{Business} once across the three draws, while the linear baseline predicts \emph{Business} every time.
 
+\newpage
 Evaluating frozen seed-42 runs on the 4,000-article confirmation sample preserves every model ranking inside both training arms (Table~\ref{tab:held-out-review}). At 10\% swaps, \textit{Word TF-IDF LR} stays ahead in both arms, while augmented \textit{Subword CNN} reaches 86.75\%, leading augmented \textit{Word CNN} by 1.30 points and clean \textit{Subword CNN} by 0.60 points. On clean confirmation articles, augmentation dips 0.45 points before rounding in \textit{Subword CNN} (88.12\% down to 87.68\%), confirming a small clean-text trade-off.
 
 \input{tables/held-out-review}

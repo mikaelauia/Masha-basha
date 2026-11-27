@@ -16,6 +16,7 @@ Keeping only the single strongest match per filter works well when one sharp phr
 
 \textit{Subword CNN} enriches each word vector with overlapping three-to-five-character fragments inspired by fastText \citep{bojanowski2017}. Each word is wrapped with start and end markers, split into overlapping character chunks, hashed into 8,192 shared buckets, and averaged back into the word vector. A middle-letter swap alters chunks covering the swapped letters, while outer prefix and suffix chunks still activate trained buckets. Both CNNs train with dropout regularization, the AdamW optimizer \citep{adamw}, and validation checkpoint selection.
 
+\newpage
 \subsection{Example of one spelling swap}
 In official test article 47, a \emph{Sci/Tech} story about Dell in China, the 5\% noise draw turns \texttt{china consumer pc} into \texttt{china cosnumer pc}. Because \texttt{consumer} appears cleanly a second time later in the story, \textit{Word TF-IDF LR} keeps the word active in its checklist at reduced weight, while neither bigram was in the training dictionary. Table~\ref{tab:observed-swap} shows how all three clean-trained models react to that single typo.
 

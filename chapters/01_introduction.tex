@@ -9,6 +9,7 @@ On AG News \citep{zhang2015,agmirror}, each model reads a story's headline and s
 We train our primary models from scratch on 20,000 labeled articles, keeping separate splits for validation, testing, and final confirmation. Fixing both training size and CPU hardware puts accuracy, typo tolerance, and speed on equal footing as swap rate (the edit probability per eligible word) scales up to 20\%.
 
 \begin{description}
+\setlength{\itemsep}{2pt}\setlength{\parskip}{2pt}
 \item[RQ1.] How do the TF-IDF baseline, \textit{Word CNN}, and \textit{Subword CNN} compare in test accuracy as spelling errors become more frequent?
 \item[RQ2.] Does training with spelling errors improve accuracy on noisy articles while keeping accuracy on clean articles?
 \end{description}
@@ -18,6 +19,7 @@ RQ1 evaluates models trained only on clean text. For RQ2, half of each topic's t
 \section{Approach and findings}
 Our three primary models process text differently:
 \begin{itemize}
+\setlength{\itemsep}{2pt}\setlength{\parskip}{2pt}
 \item \textit{Word TF-IDF LR} scores each article as a weighted checklist of single words and two-word pairs using logistic regression.
 \item \textit{Word CNN} scans ordered three-to-five-word windows and keeps each filter's highest score, mapping unknown typos to one shared fallback vector.
 \item \textit{Subword CNN} averages hashed character pieces into each word vector so surviving prefixes and suffixes still guide the filters.
