@@ -1,4 +1,4 @@
-\begin{table}[htbp]\centering\small
+\begin{table}[H]\centering\small
 \begin{tabular}{lrrrr}\toprule
  & \multicolumn{2}{c}{Clean training} & \multicolumn{2}{c}{Augmented training} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
@@ -8,5 +8,5 @@ Model (seed 42) & 0\% swaps & 20\% swaps & 0\% swaps & 20\% swaps \\\midrule
 \textit{Subword CNN} (up to 16 epochs) & 87.13 & 84.49 & 87.18 & 85.57 \\
 \bottomrule
 \end{tabular}
-\caption[Schedule ablation results]{Official test accuracy (\%) for the saved neural checkpoints fitted with seed 42 at 0\% and 20\% swap targets under clean and augmented training. \textit{Scheduled Word CNN} applies the 16-epoch schedule and learning rate decay of \textit{Subword CNN} to the word-only architecture of \textit{Word CNN}. At the intermediate 5\% and 10\% targets, \textit{Scheduled Word CNN} scored 86.43\% and 86.21\% under clean training (Macro-F1 86.41\% and 86.18\%) and 86.59\% and 86.14\% under augmented training (Macro-F1 86.60\% and 86.15\%).}\label{tab:scheduled-review}
+\caption[Schedule ablation results]{Official test accuracy (\%) at 0\% and 20\% swaps for the seed-42 CNNs. \textit{Scheduled Word CNN} uses the word-only architecture with the longer schedule and learning rate decay of \textit{Subword CNN}.}\label{tab:scheduled-review}
 \end{table}
